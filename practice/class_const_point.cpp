@@ -1,20 +1,20 @@
 #include <iostream>
-using std::cin;
-using std::cout;
-using std::endl;
+// using std::cin;
+// using std::cout;
+// using std::endl;
 
 class Point {
 
 public:
-    Point(int ix = 0, int iy = 0, int iz = 0) 
+    Point(int ix = 0, int iy = 0) 
     : _ix(ix)
     , _iy(iy)
-    , _iz(iz)
+    , _iz(_iy)
     {}
 
 private:
     const int _ix;
-    const int _iy;
+    int _iy;
     int &_iz;
 };
 

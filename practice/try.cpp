@@ -22,10 +22,11 @@ void test() {
         else 
             cout << (x/y) << endl;
     } catch(int e) {
-        cout << "catch(int)" << endl;
+        cout << "catch(int), e = " << e << endl;
     } catch(double d) {
-        cout << "catch(double)" << endl;
+        cout << "catch(double), y = " << y << endl;
     }
+
 }
 
 

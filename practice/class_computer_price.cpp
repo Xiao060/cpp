@@ -27,6 +27,11 @@ public:
         cout << "total price: " << _totalPrice << endl;
     }
 
+    // 静态成员函数, 通过类名进行调用
+    static void printTotalPrice() {
+        cout << "Total price: " << _totalPrice << endl;
+    }
+
 private:
     char* _brand;
     double _price;
@@ -40,10 +45,13 @@ double Computer::_totalPrice = 0;
 int main(int argc, char* argv[]) {
 
     Computer pc1("Thinkbook 16", 5000);
-    pc1.print();
+    // pc1.print();
+    // 静态成员函数, 直接通过类名进行调用
+    Computer::printTotalPrice();
 
     Computer pc2("redbook 16", 4999);
-    pc2.print();
+    // pc2.print();
+    Computer::printTotalPrice();
 
     return 0;
 }

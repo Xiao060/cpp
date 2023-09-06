@@ -42,7 +42,7 @@ private:
     char* _name;
 };
 
-
+// 不太懂
 int main(int argc, char* argv[]) {
 
     Student* stu = new Student(100, "Jackie");

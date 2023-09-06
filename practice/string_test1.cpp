@@ -17,9 +17,15 @@ int main(int argc, char* argv[]) {
     cout << s1.size() << endl;
     cout << s1.length() << endl;
 
-    // 遍历字符串, 数组形式
+    // 遍历字符串, 下标操作符 [], 若索引越界, 引发为定义行为
     for (size_t i = 0; i < s1.size(); ++i) {
         cout << s1[i] << " ";
+    }
+    cout << endl;
+
+    // 遍历字符串, 函数 at(), 若索引越界, 抛出 out_of_range 异常
+    for (size_t i = 0; i < s1.size(); ++i) {
+        cout << s1.at(i) << " ";
     }
     cout << endl;
 

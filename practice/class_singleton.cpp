@@ -36,7 +36,7 @@ Singleton* Singleton::_pInstance = nullptr;
 int main(int argc, char* argv[]) {
 
     Singleton* p1 = Singleton::getInstance();
-    Singleton *p2 = Singleton::getInstance();
+    Singleton* p2 = Singleton::getInstance();
 
     // assert 判断表达式是否为真, 为 假 则 终止执行
     assert(p1 == p2);

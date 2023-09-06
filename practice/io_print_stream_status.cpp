@@ -2,23 +2,31 @@
 #include <istream>
 #include <ostream>
 #include <stdexcept>
+#include <unistd.h>
 
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
 using std::cerr;
+using std::clog;
 
 void printStreamStatus(std::istream& is);
 void test2();
 void test3();
+void test4();
+void test5();
+void test6();
 
 
 
-int main(int argc, char* argv[]) {
+int main(void) {
 
     // test2();
-    test3();
+    // test3();
+    // test4();
+    // test5();
+    test6();
 
     return 0;
 }
@@ -54,7 +62,6 @@ void test2() {
     cout << s << endl;
 }
 
-
 void test3() {
     int value;
 
@@ -73,4 +80,46 @@ void test3() {
 
         cout << "value = " << value << endl;
     }
+}
+
+// getline() 获取一行输入
+void test4() {
+    char buffer[1024] = {0};
+    cout << "pls input a line string: ";
+    cin.getline(buffer, 1024);
+    cout << "the line is: " << buffer << endl;
+}
+
+void test5() {
+    // 往输出流写入一个字符
+    cout.put('a');
+    cout.put('\n');
+
+    // 将 s 中的字符写入 输出流, 写入长度为 n
+    char str[] = "hello, world!";
+    cout.write(str, sizeof(str));
+
+    // win 采用小端存储, 即 64 63 62 61, 十进制为 100 99 98 97
+    // 将 int* 强转为 char* 则 会将其当成 4 个字母 d c b a
+    int x = 0x61626364;
+    cout.write((char*) &x, sizeof(x)) << endl;
+}
+
+void test6() {
+
+    // cout 写入的文件描述符为 1
+    cout << "Hello, cout!" << endl;
+
+    // cerr / clog 写入的文件描述符为 2
+    // cerr 为无缓冲
+    // clog 为有缓冲
+    
+    // but why 例子体现不出来
+    cerr << "Hello, cerr1!";
+    sleep(1);
+    cerr << "Hello, cerr2!" << endl;
+    
+    clog << "Hello, clog1!";
+    sleep(1);
+    clog << "Hello, clog2!" << endl;
 }

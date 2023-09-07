@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <iostream>
 #include <istream>
 #include <ostream>
@@ -112,14 +113,22 @@ void test6() {
 
     // cerr / clog 写入的文件描述符为 2
     // cerr 为无缓冲
-    // clog 为有缓冲
+    // clog 为有缓冲, but 缓冲区大小默认为 0, 效果与无缓冲相同, 
+    // 可以通过 setbuf 设置缓冲区大小
+    // setbuf(FILE *__restrict stream, char *__restrict buf)
     
-    // but why 例子体现不出来
     cerr << "Hello, cerr1!";
     sleep(1);
     cerr << "Hello, cerr2!" << endl;
     
+    sleep(3);
+    
     clog << "Hello, clog1!";
     sleep(1);
     clog << "Hello, clog2!" << endl;
+
+    sleep(3);
+    cout << "Hello ";
+    sleep(1);
+    cout << "World!" << endl;
 }

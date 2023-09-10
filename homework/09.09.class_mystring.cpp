@@ -53,16 +53,18 @@ size_t String::length() const {
 }
 
 void String::print() {
-    cout << _pstr << endl;
-    cout << "-----------" << endl;
+    if (_pstr) {
+        cout << _pstr << endl;
+    }
 }
 
+const char* String::c_str() const {
+    return _pstr;
+}
 
 int main() {
 	String str1;
 	str1.print();
-
-    cout << "******" << endl;
 
 	String str2 = "Hello,world";
 	String str3("wangdao");

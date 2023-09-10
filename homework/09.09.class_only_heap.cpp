@@ -60,6 +60,7 @@ private:
 };
 
 
+
 int main(int argc, char* argv[]) {
 
     Student * s1 = new Student(1001, "XiaoMing", 12);

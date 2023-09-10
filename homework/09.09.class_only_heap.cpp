@@ -27,6 +27,7 @@ public:
     Student& operator=(const Student& stu) {
         if (this != &stu) {
             delete [] _name;
+            _name = new char[strlen(stu._name) + 1]();
             strcpy(_name, stu._name);
             _num = stu._num;
             _age = stu._age;

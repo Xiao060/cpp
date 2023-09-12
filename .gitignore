@@ -1,7 +1,7 @@
 build/
 
 *.txt
-log.*
+log*
 # Prerequisites
 *.d
 

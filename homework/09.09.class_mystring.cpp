@@ -20,8 +20,9 @@ private:
 	char * _pstr;
 };
 
+// 初始化为 '\0', 打印时不必判断
 String::String() 
-: _pstr(nullptr) {}
+: _pstr(new char[1]()) {}
 
 String::String(const char* pstr) 
 : _pstr(new char[strlen(pstr) + 1]()){
@@ -33,6 +34,8 @@ String::String(const String& rhs)
     strcpy(_pstr, rhs._pstr);
 }
 
+// 赋值运算符
+// 考虑自复制 -> 回收 -> 申请空间 -> 深拷贝
 String& String::operator=(const String& rhs) {
     if (this != &rhs) {
         delete [] _pstr;
@@ -43,9 +46,7 @@ String& String::operator=(const String& rhs) {
 }
 
 String::~String() {
-    if (_pstr != nullptr) {
-        delete [] _pstr;
-    }
+    delete [] _pstr;
 }
 
 size_t String::length() const {
@@ -53,9 +54,7 @@ size_t String::length() const {
 }
 
 void String::print() {
-    if (_pstr) {
-        cout << _pstr << endl;
-    }
+    cout << _pstr << endl;
 }
 
 const char* String::c_str() const {

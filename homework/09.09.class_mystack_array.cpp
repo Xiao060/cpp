@@ -3,48 +3,64 @@
 using std::cout;
 using std::endl;
 
-#define CAPACITY 20
-
 class Stack {
 public:
-	bool empty();	//判断栈是否为空
-	bool full();	//判断栈是否已满
+    Stack(int capacity = 10)
+    : _top(-1)
+    , _capacity(capacity)
+    , _data(new int[capacity]()) {}
+
+    ~Stack() {
+        if (_data) {
+            delete [] _data;
+            _data = nullptr;
+        }
+    }
+
+	bool empty() const;	//判断栈是否为空
+	bool full() const;	//判断栈是否已满
 	void push(int); //元素入栈
 	void pop();     //元素出栈
-	int top();		//获取栈顶元素
-    void print();
+	int top() const;		//获取栈顶元素
+    void print() ;
+
 private:
-    int _data[CAPACITY] = {0};
-    // _size 表示已储存的元素个数
-    int _size = 0;
+    int* _data;
+    int _capacity;
+    int _top;
 };
 
-bool Stack::empty() {
-    if (_size == 0) {
-        return true;
-    }
-    return false;
+bool Stack::empty() const {
+    return _top == -1;
 }
 
-bool Stack::full() {
-    if (_size == CAPACITY) {
-        return true;
+bool Stack::full() const {
+    return _top + 1 == _capacity;
+}
+
+void Stack::push(int num) {
+    if (!full()) {
+        _data[++_top] = num;
     } else {
-        return false;
+        cout << "Stack is full!" << endl;
     }
-}
-
-void Stack::push(int n) {
-    _data[_size] = n;
-    ++_size;
 }
 
 void Stack::pop() {
-    --_size;
+    if (!empty()) {
+        --_top;
+    } else {
+        cout << "Stack is empty!" << endl;
+    }
 }
 
-int Stack::top() {
-    return _data[_size-1];
+int Stack::top() const {
+    if (!empty()) {
+        return _data[_top];
+    } else {
+        cout << "Stack is empty!" << endl;
+        return 1;
+    }
 }
 
 void Stack::print() {

@@ -50,58 +50,40 @@ void Mylogger::destory() {
 
 /*********************************/
 
-void Mylogger::emerg(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.emerg(msg_full);
+void Mylogger::emerg(const char* msg) {
+    _mycat.emerg(msg);
 }
 
-void Mylogger::fatal(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.fatal(msg_full);
+void Mylogger::fatal(const char* msg) {
+    _mycat.fatal(msg);
 }
 
-void Mylogger::alert(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.alert(msg_full);
+void Mylogger::alert(const char* msg) {
+    _mycat.alert(msg);
 }
 
-void Mylogger::crit(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.crit(msg_full);
+void Mylogger::crit(const char* msg) {
+    _mycat.crit(msg);
 }
 
-void Mylogger::error(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.error(msg_full);
+void Mylogger::error(const char* msg) {
+    _mycat.error(msg);
 }
 
-void Mylogger::warn(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.warn(msg_full);
+void Mylogger::warn(const char* msg) {
+    _mycat.warn(msg);
 }
 
-void Mylogger::notice(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.notice(msg_full);
+void Mylogger::notice(const char* msg) {
+    _mycat.notice(msg);
 }
 
-void Mylogger::info(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.info(msg_full);
+void Mylogger::info(const char* msg) {
+    _mycat.info(msg);
 }
 
-void Mylogger::debug(const char* msg, const char* file, const char* func, const int& line) {
-    char msg_full[1024] = {0};
-    sprintf(msg_full, "(%s, %s, %d) %s", file, func, line, msg);
-    _mycat.debug(msg_full);
+void Mylogger::debug(const char* msg) {
+    _mycat.debug(msg);
 }
 
 

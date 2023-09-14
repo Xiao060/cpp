@@ -918,177 +918,177 @@ operator Complex() {
     5. 移动语义友好
 
 #### 隐藏实现细节
-    ```shell
-    # 安装
-    sudo apt install build-essential
+```shell
+# 安装
+sudo apt install build-essential
 
-    # 把 .c 编译? 生成 .o 文件
-    g++ -c LineImpl.c 
+# 把 .c 编译? 生成 .o 文件
+g++ -c LineImpl.c 
 
-    # 把 .o 文件 生成静态库文件 .a
-    ar rcs libLine.a LineImpl.o
+# 把 .o 文件 生成静态库文件 .a
+ar rcs libLine.a LineImpl.o
 
-    # 链接 静态库 编译程序
-    # 第 3 个参数 . 表示当前文件 
-    g++ TestLine.cc -L. -lLine
-    ```
+# 链接 静态库 编译程序
+# 第 3 个参数 . 表示当前文件 
+g++ TestLine.cc -L. -lLine
+```
 
 #### 单例的自动释放 (单独友元类)
-    ```c++
-    // 方式 1
-    // 创建 AutoRelease 对象, 数据成员为 Singleton* (即指向堆上的单例对象)
-    // 不能再使用 destory, 否则会引起 double free
+```c++
+// 方式 1
+// 创建 AutoRelease 对象, 数据成员为 Singleton* (即指向堆上的单例对象)
+// 不能再使用 destory, 否则会引起 double free
 
-    // 使用方式: 
-    // 1.构造堆上的 AutoRelease 对象, 使 AutonRelease 的指针成员同样指向堆上的单例对象
-    // 2.AutoRelease 对象销毁时, 自动调用它的析构函数, 回收单例对象的空间
+// 使用方式: 
+// 1.构造堆上的 AutoRelease 对象, 使 AutonRelease 的指针成员同样指向堆上的单例对象
+// 2.AutoRelease 对象销毁时, 自动调用它的析构函数, 回收单例对象的空间
 
-    class Singleton;
+class Singleton;
 
-    // 另一个类, 用来清理 单例对象
-    class AutoRelease {
-    public:
-        // 构造, 浅拷贝 单例对象的 指针
-        AutoRelease(Singleton* p) 
-        : _p(p) {}
+// 另一个类, 用来清理 单例对象
+class AutoRelease {
+public:
+    // 构造, 浅拷贝 单例对象的 指针
+    AutoRelease(Singleton* p) 
+    : _p(p) {}
 
-        ~AutoRelease() {
-            if (_p) {
-                delete _p;
-                _p = nullptr;
-            }
+    ~AutoRelease() {
+        if (_p) {
+            delete _p;
+            _p = nullptr;
         }
-
-    private:
-        Singleton* _p;
     }
 
+private:
+    Singleton* _p;
+}
 
-    class Singleton {
-    public:
-        static getInstance(){
 
-        }
-        
-        // 将 释放类 定义为 友元类, 使其可以访问 该类的析构函数
-        friend AutoRelease;
-    private:
-        Singleton();
-        ~Singleton();
+class Singleton {
+public:
+    static getInstance(){
 
-        static Singleton* _pInstance;
     }
+    
+    // 将 释放类 定义为 友元类, 使其可以访问 该类的析构函数
+    friend AutoRelease;
+private:
+    Singleton();
+    ~Singleton();
 
-    // 使用时先创建 栈上释放对象, 函数结束自动调用 单例对象的析构函数
-    AutoRelease ar(Singleton::getInstance());
-    ...
+    static Singleton* _pInstance;
+}
 
-    ```
+// 使用时先创建 栈上释放对象, 函数结束自动调用 单例对象的析构函数
+AutoRelease ar(Singleton::getInstance());
+...
+
+```
 
 #### 单例的自动释放 (静态对象 + 嵌套类)
-    ```c++
-    // 方式 2
-    // 可以正常使用 destory
+```c++
+// 方式 2
+// 可以正常使用 destory
 
-    class Singleton {
+class Singleton {
+public:
+    
+    // 定义一个 内部类
+    class AutoRelease {
     public:
-        
-        // 定义一个 内部类
-        class AutoRelease {
-        public:
-            AutoRelease() {}
+        AutoRelease() {}
 
-            // 内部类 可以直接访问 外部类的 私有析构函数
-            ~AutoRelease() {
-                if (_pInstance) {
-                    delete _pInstance;
-                    _pInstance = nullptr;
-                }
+        // 内部类 可以直接访问 外部类的 私有析构函数
+        ~AutoRelease() {
+            if (_pInstance) {
+                delete _pInstance;
+                _pInstance = nullptr;
             }
         }
-
-    private:
-        Singleton();
-        ~Singleton();
-
-        static Singleton* _pInstance;
-        static AutoRelease _ar;
     }
 
-    // 静态变量 类外初始化
-    Singleton* _pInstance = nullptr;
-    // 调用 AutoRelease 的无参构造进行初始化
-    Singleton::AutoRelease Singleton::_ar;
+private:
+    Singleton();
+    ~Singleton();
 
-    ```
+    static Singleton* _pInstance;
+    static AutoRelease _ar;
+}
+
+// 静态变量 类外初始化
+Singleton* _pInstance = nullptr;
+// 调用 AutoRelease 的无参构造进行初始化
+Singleton::AutoRelease Singleton::_ar;
+
+```
 
 #### 单例的自动释放 (atexit 注册函数)
-    ```c++
-    // atexit(函数指针), 被注册的函数在进程终止时调用, 先注册的后执行
-    // 注册 destory 函数, 可以正常使用 destory
-    // 多线程会存在问题, pthread_once 解决
+```c++
+// atexit(函数指针), 被注册的函数在进程终止时调用, 先注册的后执行
+// 注册 destory 函数, 可以正常使用 destory
+// 多线程会存在问题, pthread_once 解决
 
-    class Singleton {
-    public:
-        static Singleton* getInstance() {
-            if (_pInstance == nullptr) {
-                // 注册 destory
-                atexit(destory);
-                _pInstance = new Singleton();
-            }
-            return _pInstance;
+class Singleton {
+public:
+    static Singleton* getInstance() {
+        if (_pInstance == nullptr) {
+            // 注册 destory
+            atexit(destory);
+            _pInstance = new Singleton();
         }
-
-    private:
-        Singleton();
-        ~Singleton();
-
-        static Singleton* _pInstance;
+        return _pInstance;
     }
 
-    // 饿汉式 (懒加载)
-    // 当多个线程同时进入 if 语句，可能创建出多个堆对象
-    // 但是只有一个受到了 _pInstance 的管辖, 其他的都被泄漏
-    Singleton* Singleton::_pInstance = nullptr;
+private:
+    Singleton();
+    ~Singleton();
 
-    // 饱汉式, 有可能带来内存压力
-    Singleton* Singleton::_pInstance = getInstance();
+    static Singleton* _pInstance;
+}
 
-    ```
+// 饿汉式 (懒加载)
+// 当多个线程同时进入 if 语句，可能创建出多个堆对象
+// 但是只有一个受到了 _pInstance 的管辖, 其他的都被泄漏
+Singleton* Singleton::_pInstance = nullptr;
+
+// 饱汉式, 有可能带来内存压力
+Singleton* Singleton::_pInstance = getInstance();
+
+```
 
 #### 单例的自动释放 (pthread_once Linux平台)
-    ```c++
-    // pthread_once(..., 函数指针), 确保函数只会被调用一次
-    // but 单例对象 被手动销毁后无法再创建, 解决方案 destory 私有
+```c++
+// pthread_once(..., 函数指针), 确保函数只会被调用一次
+// but 单例对象 被手动销毁后无法再创建, 解决方案 destory 私有
 
-    class Singleton {
-    public:
-        static Singleton* getInstance() {
-            // 确保 创建单例对象的函数 init_r 只会被调用一次
-            pthread_once(&_once, init_r)
-            return _pInstance;
-        }
-
-        static void init_r() {
-            _pInstance = new Singleton();
-            atexit(destory);
-        }
-
-    private:
-        Singleton();
-        ~Singleton();
-
-        void destory();
-
-        static Singleton* _pInstance;
-        static pthread_once_t _once;
+class Singleton {
+public:
+    static Singleton* getInstance() {
+        // 确保 创建单例对象的函数 init_r 只会被调用一次
+        pthread_once(&_once, init_r)
+        return _pInstance;
     }
 
-    // 静态变量 类外初始化 
-    Singleton* Singleton::_pInstance = nullptr;
-    pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
+    static void init_r() {
+        _pInstance = new Singleton();
+        atexit(destory);
+    }
+
+private:
+    Singleton();
+    ~Singleton();
+
+    void destory();
+
+    static Singleton* _pInstance;
+    static pthread_once_t _once;
+}
+
+// 静态变量 类外初始化 
+Singleton* Singleton::_pInstance = nullptr;
+pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
     
-    ```
+```
 
 
 

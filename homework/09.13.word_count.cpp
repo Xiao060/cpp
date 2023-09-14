@@ -4,6 +4,8 @@
 #include <vector>
 #include <cctype>
 
+
+using std::cerr;
 using std::endl;
 using std::string;
 using std::vector;
@@ -26,6 +28,11 @@ private:
 void Dictionary::read(const string& filename) {
     
     ifstream ifs(filename);
+    if (!ifs.good()) {
+        cerr << "fail to open file" << endl;
+        return ;
+    }
+
     string word;
     while (ifs >> word) {
         if (isdigit(word.back()) || ispunct(word.back())) {

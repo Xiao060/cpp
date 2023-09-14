@@ -10,6 +10,10 @@ int main(int argc, char* argv[]) {
     String s1;
     cout << s1 << endl;
 
+    
+    // 此处使用 String s2 = "Hello World!" 也可以
+    // but 此种方式 本质为 隐式转换, 表层视为构造函数的调用
+    // 将 "H..." 转换为 一个 String 临时对象, 然后 使用拷贝构造复制给 s2
     String s2("Hello World!");
     cout << s2 << endl;
 

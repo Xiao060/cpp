@@ -602,13 +602,14 @@ log4cpp::Category::shutdown();
     1. 不能臆造一个并不存在的运算符
 
 1. 形式
-    1. 普通友元函数: 不会修改 操作数值的运算符 多使用 友元函数, `xxx& operator+(const xxx&, const xxx&);`
+    1. 友元: 不会修改 操作数值的运算符, `xxx& operator+(const xxx&, const xxx&);`; 特例: 输入/出流运算符
+       1. **普通友元函数**: 
+       2. 友元成员函数 
+       3. 友元类
 
-    1. 友元成员函数 类
+    2. 普通函数
 
-    1. 普通函数
-
-    1. 成员函数: 修改操作数值的运算符, 如 `+=`, 一般使用成员函数; 成员函数存在一个默认参数 `this` 指针
+    3. **成员函数**: 修改操作数值的运算符, 如 `+=`; 成员函数存在一个默认参数 `this` 指针
 
 
 
@@ -806,7 +807,6 @@ MiddleLayer ml(new Data);
 ```
 
 
-
 ### 三层箭头 `->`
 
 ```c++
@@ -827,8 +827,6 @@ tl->getData();
 
 ```
 
-
-
 ### 三层 解引用 `*`
 
 ```c++
@@ -844,7 +842,63 @@ ThirdLayer tl(new MiddleLayer(new Data));
 // 本质 (*tl).tlgetData(); 
 (*(tl.operator*())).getData();
 ((tl.operator*()).operator*()).getData();
+
+
+// 优化 ----> 只解引用一次进行 getData 的访问
+// ThirdLayer 重载 *, 并将 该函数声明为 MiddleLayer 友元类
+Data& operator*() {
+    return *(*_ml)._pdata;
+}
+
+ThirdLayer tl(new MiddleLayer(new Data));
+(*tl).getData();
+
 ```
+
+### 类型转换函数
+
+1. 其他类型 向 自定义类型 转换 (隐式转换)  
+    先调用构造函数得到临时对象, 再赋值, 表层体现 只调用 赋值函数
+2. 自定义类型 向 其他类型 转换
+```c++
+// 形式: operator 目标类型(){} 
+/*  性质
+1.成员函数
+2.无 参数 / 返回类型 
+4.在函数执行体中必须要返回目标类型的变量
+*/
+
+// Point ---> int
+operator int() {
+    return _ix + _iy;
+}
+
+// Point ---> Complex
+operator Complex() {
+    return Complex(_ix, _iy);
+}
+
+// 补充 Complex c; Point p; c = p
+// 方式 1: Complex 重载 =
+// 方式 2: Point 重载 类型转换
+// 方式 3: Complex 中 定义 参数为 Point 的构造函数(隐式转换)
+
+// 若 2 / 3 同时存在, 则 优先调用 类型转换, 后调用 特殊构造
+
+// 若 特殊构造 参数无 const, 则 2 / 3 冲突
+// 类型转换 参数为 this(即 Point), 特殊构造参数为 const Point& 
+
+
+```
+
+
+## 类域
+
+### 全局作用域  
+    在函数和其他类定义的外部定义的类（全局位置）称为全局类，绝大多数的C++类是定义在该作用域中，我们在前面定义的所有类都是在全局作用域中，全局类具有全局作用域
+
+### 类作用域
+    一个类可以定义在另一类的定义中，这是所谓嵌套类或者内部类
 
 
 ## 继承

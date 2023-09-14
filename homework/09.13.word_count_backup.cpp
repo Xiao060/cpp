@@ -2,9 +2,10 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cctype>
 
-using std::cin;
-using std::cout;
+
+using std::cerr;
 using std::endl;
 using std::string;
 using std::vector;
@@ -20,64 +21,71 @@ class Dictionary {
 public:
     void read(const std::string &filename);
     void store(const std::string &filename);
-
-    // vector<Record>::iterator 
-    vector<Record>::iterator binary_find(const string word);
 private:
     vector<Record> _dict;
 };
 
 void Dictionary::read(const string& filename) {
-
-    _dict.push_back({"AAA", 12});
-    _dict.push_back({"BBB", 13});
-    _dict.push_back({"CCC", 14});
-    _dict.push_back({"DDD", 15});
     
-
     ifstream ifs(filename);
+    if (!ifs.good()) {
+        cerr << "fail to open file" << endl;
+        return ;
+    }
+
     string word;
     while (ifs >> word) {
-        cout << word << endl;
+        if (isdigit(word.back()) || 
+            isdigit(word.front()) || 
+            ispunct(word.back()) || 
+            ispunct(word.front())) {
+            continue;
+        }
 
+        word.front() = tolower(word.front());
 
-        auto test = binary_find(word);
-        cout << "iterator: " << (*test)._word << ": " 
-                             << (*test)._frequency << endl;
+        auto beg = _dict.begin();
+        auto end = _dict.end();
+        auto mid = beg + (end - beg) / 2;
+    
+        while (mid != end) {
+            if (word == (*mid)._word) {
+                break;
+            } else if (word < (*mid)._word) {
+                end = mid;
+            } else {
+                beg = mid + 1;
+            }
+            mid = beg + (end - beg) / 2;
+        }
 
+        if (mid != end) {
+            ++(*mid)._frequency;
+        } else {
+            _dict.insert(mid, {word, 1});
+        }
     }
 
     ifs.close();
 }
 
 void Dictionary::store(const string& filename) {
+    ofstream ofs(filename);
 
-}
-
-vector<Record>::iterator Dictionary::binary_find(const string word) {
-    auto beg = _dict.begin();
-    auto end = _dict.end();
-    auto mid = beg + (end - beg) / 2;
-
-    while (mid != end) {
-        if (word == (*mid)._word) {
-            return mid;
-        } else if (word < (*mid)._word) {
-            end = mid;
-        } else {
-            beg = mid - 1;
-        }
-        mid = beg + (end - beg) / 2;
+    for (auto i : _dict) {
+        ofs << i._word << ": " << i._frequency << endl;
     }
-    return end;
+
+    ofs.close();
 }
+
 
 int main(int argc, char* argv[]) {
 
     Dictionary dict;
 
-    dict.read("test.txt");
-
+    dict.read("The_Holy_Bible.txt");
+    dict.store("count.txt");
 
     return 0;
 }

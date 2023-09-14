@@ -1,3 +1,5 @@
+#include <cstddef>
+#include <cstdlib>
 #include <iostream>
 #include <cstring>
 #include <ostream>
@@ -12,10 +14,13 @@ using std::ostream;
 // 3.初始化 init / 回收 destory 函数
 class Student {
 public:
-    friend class AutoRelease;
-
+    // 单例模式自动释放 3
+    // atexit 注册函数, 被注册的函数在进程结束时会自动执行
+    // 注册的函数 是 静态函数
+    // but 多线程时可能同时进入 if, 创建多个对象
     static Student* getInstance() {
         if (_pInstance == nullptr) {
+            atexit(destory);
             _pInstance = new Student();
         }
 
@@ -28,6 +33,13 @@ public:
         delete [] _pInstance->_name;
         _pInstance->_name = new char[strlen(name) + 1]();
         strcpy(_pInstance->_name, name);
+    }
+
+    static void destory() {
+        if (_pInstance) {
+            delete _pInstance;
+            _pInstance = nullptr;
+        }
     }
 
     friend ostream& operator<<(ostream& os, const Student& stu);
@@ -71,36 +83,9 @@ ostream &operator<<(ostream &os, const Student* stu) {
     return os;
 }
 
-
-// 单例模式自动释放 1
-// 1.定义友元类, 成员为 指向单例对象的指针
-// 2.析构函数 delete 单例对象指针 (调用 单例对象 operator delete / 析构函数 回收资源)
-// 3.destory 不能再使用, 否则可能出现 double free
-class AutoRelease {
-public:
-    AutoRelease(Student* pstu) 
-    : _pstu(pstu) {}
-
-    ~AutoRelease() {
-        if (_pstu) {
-            delete _pstu;
-            _pstu = nullptr;
-        }
-    }
-
-private:
-    Student* _pstu;
-};
-
-
-
-
-
 Student* Student::_pInstance = nullptr;
 
 int main(int argc, char* argv[]) {
-
-    AutoRelease tmp(Student::getInstance());
 
     Student* s1 = Student::getInstance();
     cout << s1 << endl;
@@ -108,6 +93,8 @@ int main(int argc, char* argv[]) {
     s1->init(1001, 12, "XiaoMing");
     cout << *s1 << endl;
     
+    // Student::destory();
+    // s1->destory();
     return 0;
 }
 

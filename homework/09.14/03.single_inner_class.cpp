@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <iostream>
 #include <cstring>
 #include <ostream>
@@ -12,8 +13,6 @@ using std::ostream;
 // 3.初始化 init / 回收 destory 函数
 class Student {
 public:
-    friend class AutoRelease;
-
     static Student* getInstance() {
         if (_pInstance == nullptr) {
             _pInstance = new Student();
@@ -29,6 +28,27 @@ public:
         _pInstance->_name = new char[strlen(name) + 1]();
         strcpy(_pInstance->_name, name);
     }
+
+    void destory() {
+        if (_pInstance) {
+            delete _pInstance;
+            _pInstance = nullptr;
+        }
+    }
+
+    // 单例对象自动释放 2
+    // 建立一个内部类, 其析构函数 释放 外部类对象
+    // 外部类 添加静态成员 内部类对象
+    // 可以正常使用 destory
+    class AutoRelease {
+    public:
+        ~AutoRelease() {
+            if (_pInstance) {
+                delete _pInstance;
+                _pInstance = nullptr;
+            }
+        }
+    };
 
     friend ostream& operator<<(ostream& os, const Student& stu);
     friend ostream& operator<<(ostream& os, const Student* stu);
@@ -53,6 +73,7 @@ private:
     int _age;
     char* _name;
     static Student* _pInstance;
+    static AutoRelease _ar;
 };
 
 ostream &operator<<(ostream &os, const Student &stu) {
@@ -72,35 +93,11 @@ ostream &operator<<(ostream &os, const Student* stu) {
 }
 
 
-// 单例模式自动释放 1
-// 1.定义友元类, 成员为 指向单例对象的指针
-// 2.析构函数 delete 单例对象指针 (调用 单例对象 operator delete / 析构函数 回收资源)
-// 3.destory 不能再使用, 否则可能出现 double free
-class AutoRelease {
-public:
-    AutoRelease(Student* pstu) 
-    : _pstu(pstu) {}
-
-    ~AutoRelease() {
-        if (_pstu) {
-            delete _pstu;
-            _pstu = nullptr;
-        }
-    }
-
-private:
-    Student* _pstu;
-};
-
-
-
-
 
 Student* Student::_pInstance = nullptr;
+Student::AutoRelease Student::_ar;
 
 int main(int argc, char* argv[]) {
-
-    AutoRelease tmp(Student::getInstance());
 
     Student* s1 = Student::getInstance();
     cout << s1 << endl;

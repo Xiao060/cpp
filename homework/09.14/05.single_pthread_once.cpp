@@ -1,6 +1,8 @@
+#include <cstddef>
 #include <iostream>
 #include <cstring>
 #include <ostream>
+#include <pthread.h>
 
 using std::cout;
 using std::endl;
@@ -12,14 +14,19 @@ using std::ostream;
 // 3.初始化 init / 回收 destory 函数
 class Student {
 public:
-    friend class AutoRelease;
-
+    
+    // 因为 pthread_once 只能保证函数执行一次, 故若单例对象被手动销毁便无法再创建
+    // 解决方案: destory 私有, 禁止手动调用
     static Student* getInstance() {
-        if (_pInstance == nullptr) {
-            _pInstance = new Student();
-        }
-
+        pthread_once(&_once, init_r);
         return _pInstance;
+    }
+    
+    // 将 构造 与 注册 destory 定义为一个单独函数
+    // 使用 pthreadd_once 使它们只能执行一次
+    static void init_r() {
+        _pInstance = new Student();
+        atexit(destory);
     }
 
     void init(int num, int age, const char* name) {
@@ -49,10 +56,19 @@ private:
         _name = nullptr;
     }
 
+    static void destory() {
+        if (_pInstance) {
+            delete _pInstance;
+            _pInstance = nullptr;
+        }
+    }
+
     int _num;
     int _age;
     char* _name;
     static Student* _pInstance;
+    // 为 pthread_once 的第一个参数准备
+    static pthread_once_t _once;
 };
 
 ostream &operator<<(ostream &os, const Student &stu) {
@@ -72,42 +88,21 @@ ostream &operator<<(ostream &os, const Student* stu) {
 }
 
 
-// 单例模式自动释放 1
-// 1.定义友元类, 成员为 指向单例对象的指针
-// 2.析构函数 delete 单例对象指针 (调用 单例对象 operator delete / 析构函数 回收资源)
-// 3.destory 不能再使用, 否则可能出现 double free
-class AutoRelease {
-public:
-    AutoRelease(Student* pstu) 
-    : _pstu(pstu) {}
-
-    ~AutoRelease() {
-        if (_pstu) {
-            delete _pstu;
-            _pstu = nullptr;
-        }
-    }
-
-private:
-    Student* _pstu;
-};
-
 
 
 
 
 Student* Student::_pInstance = nullptr;
+pthread_once_t Student::_once = PTHREAD_ONCE_INIT;
 
 int main(int argc, char* argv[]) {
-
-    AutoRelease tmp(Student::getInstance());
 
     Student* s1 = Student::getInstance();
     cout << s1 << endl;
 
     s1->init(1001, 12, "XiaoMing");
     cout << *s1 << endl;
-    
+
     return 0;
 }
 

@@ -63,6 +63,8 @@ int main(int argc, char* argv[]) {
 
     cout << str.length() << endl;
     cout << str.size() << endl;
+    // 字符串的长度小于等于15个字节时, buffer直接存放整个字符串;
+    // 当字符串大于15个字节时, buffer 存放的就是一个指针, 指向堆空间的区域
     // 返回 string 容量, 一般 按照 n*16-1 分配, 但是此 os 最低分配 15, 之后递增
     cout << str.capacity() << endl;
     cout << str.max_size() << endl;

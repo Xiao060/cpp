@@ -858,7 +858,8 @@ ThirdLayer tl(new MiddleLayer(new Data));
 ### 类型转换函数
 
 1. 其他类型 向 自定义类型 转换 (隐式转换)  
-    先调用构造函数得到临时对象, 再赋值, 表层体现 只调用 赋值函数
+先调用构造函数得到临时对象, 再赋值, 表层体现 只调用 赋值函数
+
 2. 自定义类型 向 其他类型 转换
 ```c++
 // 形式: operator 目标类型(){} 
@@ -883,10 +884,11 @@ operator Complex() {
 // 方式 2: Point 重载 类型转换
 // 方式 3: Complex 中 定义 参数为 Point 的构造函数(隐式转换)
 
-// 若 2 / 3 同时存在, 则 优先调用 类型转换, 后调用 特殊构造
+// 2 / 3 优先调用 类型转换, 调用 特殊构造
 
 // 若 特殊构造 参数无 const, 则 2 / 3 冲突
-// 类型转换 参数为 this(即 Point), 特殊构造参数为 const Point& 
+// 类型转换 参数为 this 指针, 可能会修改 Point 的值
+// 特殊构造参数为 const Point&, 不会修改; 即 类型转换不存在, 或者 Point 为 const 时执行
 
 
 ```
@@ -895,10 +897,211 @@ operator Complex() {
 ## 类域
 
 ### 全局作用域  
-    在函数和其他类定义的外部定义的类（全局位置）称为全局类，绝大多数的C++类是定义在该作用域中，我们在前面定义的所有类都是在全局作用域中，全局类具有全局作用域
+在函数和其他类定义的外部定义的类(全局位置)称为全局类，绝大多数的C++类是定义在该作用域中，我们在前面定义的所有类都是在全局作用域中，全局类具有全局作用域
 
 ### 类作用域
-    一个类可以定义在另一类的定义中，这是所谓嵌套类或者内部类
+
+#### 概述
+1. 一个类可以定义在另一类的定义中，这是所谓嵌套类或者内部类  
+2. 内部类本身 不占用 外部类 的存储空间
+3. 内部类 是 外部类 的 友元类; 可以直接访问 外部类的 静态成员, 私有成员需要通过对象访问
+4. 内部类的静态成员需要在 全局位置 声明, 且加上外部类的作用域限定
+![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309141552588.png)
+
+#### PIMPL 设计模式
+(Private Implementation 或 Pointer to Implementation)
+1. 优点
+    1. 提高编译速度
+    2. 实现信息隐藏
+    3. 减小编译依赖，可以用最小的代价平滑的升级库文件
+    4. 接口与实现进行解耦
+    5. 移动语义友好
+
+#### 隐藏实现细节
+    ```shell
+    # 安装
+    sudo apt install build-essential
+
+    # 把 .c 编译? 生成 .o 文件
+    g++ -c LineImpl.c 
+
+    # 把 .o 文件 生成静态库文件 .a
+    ar rcs libLine.a LineImpl.o
+
+    # 链接 静态库 编译程序
+    # 第 3 个参数 . 表示当前文件 
+    g++ TestLine.cc -L. lLine
+    ```
+
+#### 单例的自动释放 (单独友元类)
+    ```c++
+    // 方式 1
+    // 创建 AutoRelease 对象, 数据成员为 Singleton* (即指向堆上的单例对象)
+    // 不能再使用 destory, 否则会引起 double free
+
+    // 使用方式: 
+    // 1.构造堆上的 AutoRelease 对象, 使 AutonRelease 的指针成员同样指向堆上的单例对象
+    // 2.AutoRelease 对象销毁时, 自动调用它的析构函数, 回收单例对象的空间
+
+    class Singleton;
+
+    // 另一个类, 用来清理 单例对象
+    class AutoRelease {
+    public:
+        // 构造, 浅拷贝 单例对象的 指针
+        AutoRelease(Singleton* p) 
+        : _p(p) {}
+
+        ~AutoRelease() {
+            if (_p) {
+                delete _p;
+                _p = nullptr;
+            }
+        }
+
+    private:
+        Singleton* _p;
+    }
+
+
+    class Singleton {
+    public:
+        static getInstance(){
+
+        }
+        
+        // 将 释放类 定义为 友元类, 使其可以访问 该类的析构函数
+        friend AutoRelease;
+    private:
+        Singleton();
+        ~Singleton();
+
+        static Singleton* _pInstance;
+    }
+
+    // 使用时先创建 栈上释放对象, 函数结束自动调用 单例对象的析构函数
+    AutoRelease ar(Singleton::getInstance());
+    ...
+
+    ```
+
+#### 单例的自动释放 (静态对象 + 嵌套类)
+    ```c++
+    // 方式 2
+    // 可以正常使用 destory
+
+    class Singleton {
+    public:
+        
+        // 定义一个 内部类
+        class AutoRelease {
+        public:
+            AutoRelease() {}
+
+            // 内部类 可以直接访问 外部类的 私有析构函数
+            ~AutoRelease() {
+                if (_pInstance) {
+                    delete _pInstance;
+                    _pInstance = nullptr;
+                }
+            }
+        }
+
+    private:
+        Singleton();
+        ~Singleton();
+
+        static Singleton* _pInstance;
+        static AutoRelease _ar;
+    }
+
+    // 静态变量 类外初始化
+    Singleton* _pInstance = nullptr;
+    // 调用 AutoRelease 的无参构造进行初始化
+    Singleton::AutoRelease Singleton::_ar;
+
+    ```
+
+#### 单例的自动释放 (atexit 注册函数)
+    ```c++
+    // atexit(函数指针), 被注册的函数在进程终止时调用, 先注册的后执行
+    // 注册 destory 函数, 可以正常使用 destory
+    // 多线程会存在问题, pthread_once 解决
+
+    class Singleton {
+    public:
+        static Singleton* getInstance() {
+            if (_pInstance == nullptr) {
+                // 注册 destory
+                atexit(destory);
+                _pInstance = new Singleton();
+            }
+            return _pInstance;
+        }
+
+    private:
+        Singleton();
+        ~Singleton();
+
+        static Singleton* _pInstance;
+    }
+
+    // 饿汉式 (懒加载)
+    // 当多个线程同时进入 if 语句，可能创建出多个堆对象
+    // 但是只有一个受到了 _pInstance 的管辖, 其他的都被泄漏
+    Singleton* Singleton::_pInstance = nullptr;
+
+    // 饱汉式, 有可能带来内存压力
+    Singleton* Singleton::_pInstance = getInstance();
+
+    ```
+
+#### 单例的自动释放 (pthread_once Linux平台)
+    ```c++
+    // pthread_once(..., 函数指针), 确保函数只会被调用一次
+    // but 单例对象 被手动销毁后无法再创建, 解决方案 destory 私有
+
+    class Singleton {
+    public:
+        static Singleton* getInstance() {
+            // 确保 创建单例对象的函数 init_r 只会被调用一次
+            pthread_once(&_once, init_r)
+            return _pInstance;
+        }
+
+        static void init_r() {
+            _pInstance = new Singleton();
+            atexit(destory);
+        }
+
+    private:
+        Singleton();
+        ~Singleton();
+
+        void destory();
+
+        static Singleton* _pInstance;
+        static pthread_once_t _once;
+    }
+
+    // 静态变量 类外初始化 
+    Singleton* Singleton::_pInstance = nullptr;
+    pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
+    
+    ```
+
+
+
+## string 底层实现
+
+1. 信息
+   1. 字符串的大小
+   2. 能够容纳的字符数量
+   3. 字符串内容本身
+
+2. SSO (短字符串优化)
+字符串的长度小于等于15个字节时, buffer直接存放整个字符串; 
+当字符串大于15个字节时, buffer存放的就是一个指针, 指向堆空间的区域
 
 
 ## 继承

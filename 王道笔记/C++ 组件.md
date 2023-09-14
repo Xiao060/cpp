@@ -930,7 +930,7 @@ operator Complex() {
 
     # 链接 静态库 编译程序
     # 第 3 个参数 . 表示当前文件 
-    g++ TestLine.cc -L. lLine
+    g++ TestLine.cc -L. -lLine
     ```
 
 #### 单例的自动释放 (单独友元类)

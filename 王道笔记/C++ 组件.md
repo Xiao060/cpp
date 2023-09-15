@@ -925,7 +925,7 @@ sudo apt install build-essential
 # 把 .c 编译? 生成 .o 文件
 g++ -c LineImpl.c 
 
-# 把 .o 文件 生成静态库文件 .a
+# 把 .o 文件 生成静态库文件 .a (多个 .o 文件可以生成 1 个静态库)
 ar rcs libLine.a LineImpl.o
 
 # 链接 静态库 编译程序

@@ -21,13 +21,6 @@ public:
         pthread_once(&_once, init_r);
         return _pInstance;
     }
-    
-    // 将 构造 与 注册 destory 定义为一个单独函数
-    // 使用 pthreadd_once 使它们只能执行一次
-    static void init_r() {
-        _pInstance = new Student();
-        atexit(destory);
-    }
 
     void init(int num, int age, const char* name) {
         _pInstance->_num = num;
@@ -54,6 +47,14 @@ private:
     ~Student() {
         delete [] _name;
         _name = nullptr;
+    }
+
+    // 将 构造 与 注册 destory 定义为一个单独函数
+    // 使用 pthreadd_once 使它们只能执行一次
+    // 且该函数也应设为 私有, 否则可以通过手动调用创建出多个堆上的对象
+    static void init_r() {
+        _pInstance = new Student();
+        atexit(destory);
     }
 
     static void destory() {

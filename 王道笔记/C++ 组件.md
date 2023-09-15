@@ -1113,6 +1113,14 @@ class CowString {
     CowString::~CowString();
     CowString& CowString::operator=(const CowString& rhs);
 
+    const char* c_str() const {
+        return _pstr;
+    }
+
+    int size() const {
+        return strlen(_pstr);
+    }
+
 
 private:
     char* malloc(const char* pstr = nullptr) {

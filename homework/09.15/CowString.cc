@@ -1,4 +1,5 @@
 #include "CowString.hh"
+#include <cstring>
 #include <iostream>
 #include <ostream>
 
@@ -78,10 +79,12 @@ CowString::~CowString() {
 
 // 重载 赋值运算符 (CowString 对象版), 先释放原有内容, 指针指向新内容, 引用计数 +1
 CowString& CowString::operator=(const CowString& lhs) {
-    release();
-    _pstr = lhs._pstr;
-    increaseRefcount();
-    cout << "CS赋值" << endl;
+    if (this != &lhs) {
+        release();
+        _pstr = lhs._pstr;
+        increaseRefcount();
+        cout << "CS赋值" << endl;
+    }
     return *this;
 }
 
@@ -92,6 +95,61 @@ ostream& operator<<(ostream& os, const CowString& rhs) {
     return os;
 }
 
+// 获取字符串长度
+int CowString::size() {
+    return strlen(_pstr);
+}
+
+/******************************************************************/
+
+// CharProxy 内部类构造函数
+CowString::CharProxy::CharProxy(CowString& self, size_t idx)
+: _self(self)
+, _idx(idx) {}
+
+// 类型转换函数 
+CowString::CharProxy::operator char() {
+    //检查是否越界
+    if (_idx < _self.size()) {
+        return _self._pstr[_idx];
+    }
+
+    cout << "访问越界";
+    static char nullchar = '\0';
+    return nullchar;
+}
+
+// 重载 赋值运算符函数
+char& CowString::CharProxy::operator=(char ch) {
+    // 判断索引 是否 越界
+    if (_idx < _self.size()) {
+
+        // 引用计数 == 1, 直接修改
+        // 引用计数 > 1, 则 引用计数 -1 ----> 深拷贝 ----> 初始化引用计数
+        if (_self.use_count() > 1) {
+            _self.decreaseRefcount();
+
+            char* ptmp = _self.malloc(_self._pstr); 
+            strcpy(ptmp, _self._pstr);
+
+            _self._pstr = ptmp;
+            _self.initRefcount();
+        }
+        
+        _self._pstr[_idx] = ch;
+        return _self._pstr[_idx];
+    }
+
+    // 越界, 返回 nullchar
+    cout << "访问越界" << endl;
+    static char nullchar = '\0';
+    return nullchar;
+}
+    
+// CowString 重载 取下标运算符, 返回值为 CharProxy 对象 (成员函数)
+CowString::CharProxy CowString::operator[](size_t idx) {
+    return CharProxy(*this, idx);
+}
 
 
 

@@ -7,6 +7,25 @@
 using std::ostream;
 
 class CowString {
+
+public:
+
+    // 若直接在 CowString 内定义成员函数, 返回 char&, 则无法区分 R / W
+    class CharProxy {
+    public:
+        CharProxy(CowString& self, size_t idx);
+        
+        // 重载 类型转换函数, 使 CharProxy 可以直接输出 而 不用 重载 <<  
+        operator char();
+
+        // 重载 赋值运算符函数
+        char& operator=(char ch);
+
+    private:
+        CowString& _self;
+        int _idx;
+    };
+
 public:
     // 构造函数
     // 1.无参构造, 则必须分配空间, 初始化 引用计数
@@ -27,13 +46,16 @@ public:
     // 重载 输出运算符 (友元)
     friend ostream& operator<<(ostream& os, const CowString& rhs);
 
+    /******************************************************/
 
-
-
-
-
+    // 重载 取下标运算符, 返回值为 CharProxy 对象
+    CharProxy operator[](size_t idx);
+    
     // 获取 引用计数
     int use_count();
+
+    // 获取字符串长度
+    int size();
 
 private:
     // 分配空间

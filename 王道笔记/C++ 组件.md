@@ -1323,7 +1323,7 @@ ostream& operator<<(ostream& os, const CowString& rhs) {
 **注意:** 对象地址 指向低地址, 内容地址 指向高地址
 ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309151635349.png)
 
-1. 当在栈上创建字符串时
+2. 当在栈上创建字符串时
     1. len <= 15, str内容分布在栈上; 
     2. len > 15, str内容分布在堆上;  
 

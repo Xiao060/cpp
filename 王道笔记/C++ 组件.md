@@ -1216,7 +1216,8 @@ CowString& CowString::operator=(const CowString& rhs) {
     return *this;
 }
 
-
+// but 如果只是希望输出 某个字符, 也会完成深拷贝
+// 解决方案: 让返回值为自定义类型, 对该类型进行运算符重载
 char& CowString::operator[](size_t idx) {
     if (idx < size()) {
         

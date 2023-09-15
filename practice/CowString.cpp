@@ -8,11 +8,31 @@ using std::ostream;
 
 class CowString {
 public:
+    class CharProxy {
+    public:
+        CharProxy(CowString& self, size_t idx)        
+        : _self(self)
+        , _idx(idx) {}
+
+        // 赋值
+        char& operator=(char ch);
+        // 输出
+        friend ostream& operator<<(ostream& os, const CharProxy& rhs);
+
+    private:
+        CowString& _self;
+        size_t _idx;
+    };
+
+
+public:
     CowString();
     CowString(const char* pstr);
     CowString(const CowString& rhs);
     ~CowString();
     CowString& operator=(const CowString& rhs);
+    // char& operator[](size_t idx);
+    CharProxy& operator[](size_t idx);
 
     friend ostream& operator<<(ostream& os, const CowString& rhs);
 
@@ -112,6 +132,32 @@ CowString& CowString::operator=(const CowString& rhs) {
         increaseRefcount();
     }
     return *this;
+}
+
+// but 如果只是希望输出 某个字符, 也会完成深拷贝
+// 解决方案: 让返回值为自定义类型, 对该类型进行运算符重载
+// char& CowString::operator[](size_t idx) {
+//     if (idx < size()) {
+        
+//         if (use_count() > 1) {
+//             decreaseRefcount();
+//             // 进行深拷贝
+//             char* ptmp = malloc(_pstr);
+//             strcpy(ptmp, _pstr);
+//             // 改变 _pstr 指向, 初始化引用计数
+//             _pstr = ptmp;
+//             initRefcount();
+//         }
+
+//         return _pstr[idx];
+//     }
+
+//     cout << "访问越界" << endl;
+//     static char nullchar = '\0';
+//     return nullchar;
+// }
+CowString::CharProxy& CowString::operator[](size_t idx) {
+
 }
 
 

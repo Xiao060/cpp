@@ -1099,7 +1099,11 @@ pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
    2. 能够容纳的字符数量
    3. 字符串内容本身
 
-2. SSO (短字符串优化)
+### 深拷贝
+
+### 写时复制 (COW-CopyOnWrite)
+
+### 短字符串优化 (SSO-Short String Optimization)
 字符串的长度小于等于15个字节时, buffer直接存放整个字符串; 
 当字符串大于15个字节时, buffer存放的就是一个指针, 指向堆空间的区域
 

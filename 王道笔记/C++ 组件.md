@@ -1107,15 +1107,46 @@ pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
 
 ```c++
 class CowString {
+public:
+    class CharProxy {
+    public:
+        CharProxy(CowString& self, size_t idx)        
+        : _self(self)
+        , _idx(idx) {}
+
+        // 赋值
+        char& operator=(char ch);
+
+        /***********************************************************/
+        // // 输出
+        // friend ostream& operator<<(ostream& os, const CharProxy& rhs);
+
+        // 为了解决双友元声明, 可以在 CharProxy 添加 类型转换函数
+        // 当 cout << str[0] << endl; 时, 输出运算符 无法处理 CharProxy 对象
+        // 会自动去 成员函数 中寻找 类型转换函数 进行转换
+        operator char() {
+            return _self._pstr[_idx];
+        }
+
+    private:
+        CowString& _self;
+        size_t _idx;
+    };
+
+public:
     CowString();
     CowString(const char* pstr);
     CowString(const CowString& rhs);
     ~CowString();
     CowString& operator=(const CowString& rhs);
-    char& operator[](size_t idx);
 
-
+    // char& operator[](size_t idx);
+    // 重载 下标访问运算符, 返回值为 CharProxy 对象
+    CharProxy operator[](size_t idx);
     friend ostream& operator<<(ostream& os, const CowString& rhs);
+    
+    // 外部类 中的 友元声明
+    // friend ostream& operator<<(ostream &os, const CowString::CharProxy &rhs);
 
     const char* c_str() const {
         return _pstr;
@@ -1218,20 +1249,49 @@ CowString& CowString::operator=(const CowString& rhs) {
 
 // but 如果只是希望输出 某个字符, 也会完成深拷贝
 // 解决方案: 让返回值为自定义类型, 对该类型进行运算符重载
-char& CowString::operator[](size_t idx) {
-    if (idx < size()) {
+// char& CowString::operator[](size_t idx) {
+//     if (idx < size()) {
         
-        if (use_count() > 1) {
-            decreaseRefcount();
+//         if (use_count() > 1) {
+//             decreaseRefcount();
+//             // 进行深拷贝
+//             char* ptmp = malloc(_pstr);
+//             strcpy(ptmp, _pstr);
+//             // 改变 _pstr 指向, 初始化引用计数
+//             _pstr = ptmp;
+//             initRefcount();
+//         }
+
+//         return _pstr[idx];
+//     }
+
+//     cout << "访问越界" << endl;
+//     static char nullchar = '\0';
+//     return nullchar;
+// }
+
+CowString::CharProxy CowString::operator[](size_t idx) {
+    return CharProxy(*this, idx);
+}
+
+// 赋值
+char& CowString::CharProxy::operator=(char ch) {
+    if (_idx < _self.size()) {
+
+        if (_self.use_count() > 1) {
+            _self.decreaseRefcount();
             // 进行深拷贝
-            char* ptmp = malloc(_pstr);
-            strcpy(ptmp, _pstr);
+            char* ptmp = _self.malloc(_self._pstr);
+            strcpy(ptmp, _self._pstr);
             // 改变 _pstr 指向, 初始化引用计数
-            _pstr = ptmp;
-            initRefcount();
+            _self._pstr = ptmp;
+            _self.initRefcount();
         }
 
-        return _pstr[idx];
+        // 写操作
+        _self._pstr[_idx] = ch;
+
+        return _self._pstr[_idx];
     }
 
     cout << "访问越界" << endl;
@@ -1239,7 +1299,13 @@ char& CowString::operator[](size_t idx) {
     return nullchar;
 }
 
+// // 输出
+// ostream& operator<<(ostream &os, const CowString::CharProxy &rhs) {
+//     os << rhs._self._pstr[rhs._idx];
+//     return os;
+// }
 
+/******************************************************/
 
 ostream& operator<<(ostream& os, const CowString& rhs) {
     os << rhs._pstr;

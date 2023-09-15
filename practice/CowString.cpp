@@ -24,7 +24,6 @@ public:
         size_t _idx;
     };
 
-
 public:
     CowString();
     CowString(const char* pstr);
@@ -32,7 +31,9 @@ public:
     ~CowString();
     CowString& operator=(const CowString& rhs);
     // char& operator[](size_t idx);
-    CharProxy& operator[](size_t idx);
+    friend ostream& operator<<(ostream &os, const CowString::CharProxy &rhs);
+
+    CharProxy operator[](size_t idx);
 
     friend ostream& operator<<(ostream& os, const CowString& rhs);
 
@@ -156,10 +157,45 @@ CowString& CowString::operator=(const CowString& rhs) {
 //     static char nullchar = '\0';
 //     return nullchar;
 // }
-CowString::CharProxy& CowString::operator[](size_t idx) {
 
+/***********************************************************/
+
+CowString::CharProxy CowString::operator[](size_t idx) {
+    return CharProxy(*this, idx);
 }
 
+// 赋值
+char& CowString::CharProxy::operator=(char ch) {
+    if (_idx < _self.size()) {
+
+        if (_self.use_count() > 1) {
+            _self.decreaseRefcount();
+            // 进行深拷贝
+            char* ptmp = _self.malloc(_self._pstr);
+            strcpy(ptmp, _self._pstr);
+            // 改变 _pstr 指向, 初始化引用计数
+            _self._pstr = ptmp;
+            _self.initRefcount();
+        }
+
+        // 写操作
+        _self._pstr[_idx] = ch;
+
+        return _self._pstr[_idx];
+    }
+
+    cout << "访问越界" << endl;
+    static char nullchar = '\0';
+    return nullchar;
+}
+
+// 输出
+ostream& operator<<(ostream &os, const CowString::CharProxy &rhs) {
+    os << rhs._self._pstr[rhs._idx];
+    return os;
+}
+
+/******************************************************/
 
 ostream& operator<<(ostream& os, const CowString& rhs) {
     os << rhs._pstr;

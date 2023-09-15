@@ -1107,11 +1107,12 @@ pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
 
 ```c++
 class CowString {
-    CowString::CowString();
-    CowString::CowString(const char* pstr);
-    CowString::CowString(const CowString& rhs);
-    CowString::~CowString();
-    CowString& CowString::operator=(const CowString& rhs);
+    CowString();
+    CowString(const char* pstr);
+    CowString(const CowString& rhs);
+    ~CowString();
+    CowString& operator=(const CowString& rhs);
+    friend ostream& operator<<(ostream& os, const CowString& rhs);
 
     const char* c_str() const {
         return _pstr;
@@ -1120,7 +1121,7 @@ class CowString {
     int size() const {
         return strlen(_pstr);
     }
-
+    
 
 private:
     char* malloc(const char* pstr = nullptr) {
@@ -1139,14 +1140,16 @@ private:
         }
     }
 
+    /*********************************************************/
+
+    int use_count() {
+        return *reinterpret_cast<int*> (_pstr - kRefcountLength);
+    }
+
     // 将 初始化引用计数 封装为 1 个函数
     void initRefcount() {
         // 将 char* 强转为 int*
         *reinterpret_cast<int*> (_pstr - kRefcountLength) = 1;
-    }
-
-    int use_count() {
-        return *reinterpret_cast<int*> (_pstr - kRefcountLength);
     }
 
     int increaseRefcount() {
@@ -1175,9 +1178,10 @@ CowString::CowString()
     initRefcount();
 }
 
-// 析构函数, 引用计数先减 1, 结果为 0 直接销毁
-CowString::~CowString() {
-    release();
+CowString::CowString(const char* pstr) 
+: _pstr(malloc(pstr)) {
+    increaseRefcount();
+    strcpy(_pstr, pstr);
 }
 
 // 拷贝赋值, 直接让引用计数增加 1
@@ -1186,10 +1190,11 @@ CowString::CowString(const CowString& rhs)
     increaseRefcount();
 }
 
+/*****************************************/
 
-CowString::CowString(const char* pstr) 
-: _pstr(malloc(pstr)) {
-    increaseRefcount();
+// 析构函数, 引用计数先减 1, 结果为 0 直接销毁
+CowString::~CowString() {
+    release();
 }
 
 CowString& CowString::operator=(const CowString& rhs) {
@@ -1200,9 +1205,15 @@ CowString& CowString::operator=(const CowString& rhs) {
         // 浅拷贝
         _pstr = rhs._pstr;
         // 引用计数 +1
-        increaseRefount();
+        increaseRefcount();
     }
     return *this;
+}
+
+
+ostream& operator<<(ostream& os, const CowString& rhs) {
+    os << rhs._pstr;
+    return 0s;
 }
 
 ```

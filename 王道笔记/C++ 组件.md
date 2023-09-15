@@ -1102,7 +1102,104 @@ pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
 ### 深拷贝
 
 ### 写时复制 (COW-CopyOnWrite)
-引用计数
+引用计数  
+![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309151100067.png)
+
+```c++
+class CowString {
+    CowString::CowString();
+    CowString::CowString(const char* pstr);
+    CowString::CowString(const CowString& rhs);
+    CowString::~CowString();
+    CowString& CowString::operator=(const CowString& rhs);
+
+
+private:
+    char* malloc(const char* pstr = nullptr) {
+        if (pstr == nullptr) {
+            return new char[kRefcountLength + 1]() + kRefcountLength;
+        } else {
+            return new char[kRefcountLength + strlen(pstr) + 1]() + kRefcountLength;
+        }
+    }
+
+    void release() {
+        decreaseRefcount();
+        if (use_count() == 0) {
+            delete [] (_pstr - kRefcountLength);
+            _pstr = nullptr;
+        }
+    }
+
+    // 将 初始化引用计数 封装为 1 个函数
+    void initRefcount() {
+        // 将 char* 强转为 int*
+        *reinterpret_cast<int*> (_pstr - kRefcountLength) = 1;
+    }
+
+    int use_count() {
+        return *reinterpret_cast<int*> (_pstr - kRefcountLength);
+    }
+
+    int increaseRefcount() {
+        ++*reinterpret_cast<int*> (_pstr - kRefcountLength);
+    }
+
+    int decreaseRefcount() {
+        --*reinterpret_cast<int*> (_pstr - kRefcountLength);
+    }
+
+private:
+    // 引用计数所占空间
+    static const int kRefcountLength = 4;
+    char* _pstr;
+}
+
+
+
+
+
+
+// 默认构造, 申请空间 (引用计数 + 空字符)
+// 且 将 _pstr 初始化为 字符串首地址
+CowString::CowString()
+: _pstr(malloc()) {
+    initRefcount();
+}
+
+// 析构函数, 引用计数先减 1, 结果为 0 直接销毁
+CowString::~CowString() {
+    release();
+}
+
+// 拷贝赋值, 直接让引用计数增加 1
+CowString::CowString(const CowString& rhs) 
+: _pstr(rhs._pstr) {
+    increaseRefcount();
+}
+
+
+CowString::CowString(const char* pstr) 
+: _pstr(malloc(pstr)) {
+    increaseRefcount();
+}
+
+CowString& CowString::operator=(const CowString& rhs) {
+    // 考虑自复制
+    if (this != &rhs) {
+        // 判断引用计数后再决定是否回收
+        release();
+        // 浅拷贝
+        _pstr = rhs._pstr;
+        // 引用计数 +1
+        increaseRefount();
+    }
+    return *this;
+}
+
+```
+
+
 
 ### 短字符串优化 (SSO-Short String Optimization)
 字符串的长度小于等于15个字节时, buffer直接存放整个字符串; 

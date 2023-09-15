@@ -1121,15 +1121,18 @@ class CowString {
     int size() const {
         return strlen(_pstr);
     }
-    
 
 private:
-    char* malloc(const char* pstr = nullptr) {
-        if (pstr == nullptr) {
-            return new char[kRefcountLength + 1]() + kRefcountLength;
-        } else {
-            return new char[kRefcountLength + strlen(pstr) + 1]() + kRefcountLength;
-        }
+    // char* malloc(const char* pstr = nullptr) {
+    //     if (pstr == nullptr) {
+    //         return new char[kRefcountLength + 1]() + kRefcountLength;
+    //     } else {
+    //         return new char[kRefcountLength + strlen(pstr) + 1]() + kRefcountLength;
+    //     }
+    // }
+
+    char* malloc(const char* pstr = "") {
+        return new char[kRefcountLength + strlen(pstr) + 1]() + kRefcountLength;
     }
 
     void release() {

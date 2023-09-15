@@ -25,12 +25,15 @@ public:
     }
 
 private:
-    char* malloc(const char* pstr = nullptr) {
-        if (pstr == nullptr) {
-            return new char[kRefcountLength + 1]() + kRefcountLength;
-        } else {
-            return new char[kRefcountLength + strlen(pstr) + 1]() + kRefcountLength;
-        }
+    // char* malloc(const char* pstr = nullptr) {
+    //     if (pstr == nullptr) {
+    //         return new char[kRefcountLength + 1]() + kRefcountLength;
+    //     } else {
+    //         return new char[kRefcountLength + strlen(pstr) + 1]() + kRefcountLength;
+    //     }
+    // }
+    char* malloc(const char* pstr = "") {
+        return new char[kRefcountLength + strlen(pstr) + 1]() + kRefcountLength;
     }
 
     void release() {
@@ -134,14 +137,7 @@ int main(int argc, char* argv[]) {
     cout << "s1: " << s1 << endl;
     cout << "s2: " << s2 << endl;
 
-
     CowString s3 = "Hello C++!";
-    CowString s4 
-
-
-
-
-    
 
     return 0;
 }

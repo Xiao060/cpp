@@ -1247,29 +1247,7 @@ CowString& CowString::operator=(const CowString& rhs) {
     return *this;
 }
 
-// but 如果只是希望输出 某个字符, 也会完成深拷贝
-// 解决方案: 让返回值为自定义类型, 对该类型进行运算符重载
-// char& CowString::operator[](size_t idx) {
-//     if (idx < size()) {
-        
-//         if (use_count() > 1) {
-//             decreaseRefcount();
-//             // 进行深拷贝
-//             char* ptmp = malloc(_pstr);
-//             strcpy(ptmp, _pstr);
-//             // 改变 _pstr 指向, 初始化引用计数
-//             _pstr = ptmp;
-//             initRefcount();
-//         }
-
-//         return _pstr[idx];
-//     }
-
-//     cout << "访问越界" << endl;
-//     static char nullchar = '\0';
-//     return nullchar;
-// }
-
+// CowString 重载 取下标运算符
 CowString::CharProxy CowString::operator[](size_t idx) {
     return CharProxy(*this, idx);
 }

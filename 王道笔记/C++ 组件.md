@@ -1112,6 +1112,9 @@ class CowString {
     CowString(const CowString& rhs);
     ~CowString();
     CowString& operator=(const CowString& rhs);
+    char& operator[](size_t idx);
+
+
     friend ostream& operator<<(ostream& os, const CowString& rhs);
 
     const char* c_str() const {
@@ -1155,11 +1158,11 @@ private:
         *reinterpret_cast<int*> (_pstr - kRefcountLength) = 1;
     }
 
-    int increaseRefcount() {
+    void increaseRefcount() {
         ++*reinterpret_cast<int*> (_pstr - kRefcountLength);
     }
 
-    int decreaseRefcount() {
+    void decreaseRefcount() {
         --*reinterpret_cast<int*> (_pstr - kRefcountLength);
     }
 
@@ -1167,7 +1170,7 @@ private:
     // 引用计数所占空间
     static const int kRefcountLength = 4;
     char* _pstr;
-}
+};
 
 
 
@@ -1214,10 +1217,37 @@ CowString& CowString::operator=(const CowString& rhs) {
 }
 
 
+char& CowString::operator[](size_t idx) {
+    if (idx < size()) {
+        
+        if (use_count() > 1) {
+            decreaseRefcount();
+            // 进行深拷贝
+            char* ptmp = malloc(_pstr);
+            strcpy(ptmp, _pstr);
+            // 改变 _pstr 指向, 初始化引用计数
+            _pstr = ptmp;
+            initRefcount();
+        }
+
+        return _pstr[idx];
+    }
+
+    cout << "访问越界" << endl;
+    static char nullchar = '\0';
+    return nullchar;
+}
+
+
+
 ostream& operator<<(ostream& os, const CowString& rhs) {
     os << rhs._pstr;
-    return 0s;
+    return os;
 }
+
+
+
+
 
 ```
 

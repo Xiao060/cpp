@@ -1102,6 +1102,7 @@ pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
 ### 深拷贝
 
 ### 写时复制 (COW-CopyOnWrite)
+引用计数
 
 ### 短字符串优化 (SSO-Short String Optimization)
 字符串的长度小于等于15个字节时, buffer直接存放整个字符串; 

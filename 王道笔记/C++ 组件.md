@@ -1318,11 +1318,12 @@ ostream& operator<<(ostream& os, const CowString& rhs) {
 
 ### 短字符串优化 (SSO-Short String Optimization)
 1. 概述  
-字符串的长度小于等于15个字节时, buffer直接存放整个字符串, 即 str内容分布在栈上;   
-当字符串大于15个字节时, buffer存放的就是一个指针, 指向堆空间的区域, 即 str内容分布在堆上;  
+字符串的长度小于等于15个字节时, buffer直接存放整个字符串;   
+当字符串长度大于15个字节时, buffer存放的是一个指针, 指向堆空间的区域;  
+**注意:** 对象地址 指向低地址, 内容地址 指向高地址
 ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309151635349.png)
 
-2. 当在栈上创建字符串时
+1. 当在栈上创建字符串时
     1. len <= 15, str内容分布在栈上; 
     2. len > 15, str内容分布在堆上;  
 

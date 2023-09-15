@@ -1118,8 +1118,6 @@ public:
         char& operator=(char ch);
 
         /***********************************************************/
-        // // 输出
-        // friend ostream& operator<<(ostream& os, const CharProxy& rhs);
 
         // 为了解决双友元声明, 可以在 CharProxy 添加 类型转换函数
         // 当 cout << str[0] << endl; 时, 输出运算符 无法处理 CharProxy 对象
@@ -1140,14 +1138,10 @@ public:
     ~CowString();
     CowString& operator=(const CowString& rhs);
 
-    // char& operator[](size_t idx);
     // 重载 下标访问运算符, 返回值为 CharProxy 对象
     CharProxy operator[](size_t idx);
     friend ostream& operator<<(ostream& os, const CowString& rhs);
     
-    // 外部类 中的 友元声明
-    // friend ostream& operator<<(ostream &os, const CowString::CharProxy &rhs);
-
     const char* c_str() const {
         return _pstr;
     }
@@ -1277,11 +1271,6 @@ char& CowString::CharProxy::operator=(char ch) {
     return nullchar;
 }
 
-// // 输出
-// ostream& operator<<(ostream &os, const CowString::CharProxy &rhs) {
-//     os << rhs._self._pstr[rhs._idx];
-//     return os;
-// }
 
 /******************************************************/
 

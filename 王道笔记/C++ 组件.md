@@ -1339,6 +1339,87 @@ ostream& operator<<(ostream& os, const CowString& rhs) {
 ### 3.添加自己新的成员 (非必需)
 
 
+## set
+
+1. 构造
+```c++
+#include <set>
+using std::set;
+
+// 无参构造
+set<int> number;
+
+// 列表形式构造
+set<int> number = {x, x, x, x, ...};  
+    
+// 迭代器构造, set<int>::iterator / auto
+
+// 拷贝构造
+
+```
+
+2. 特征
+   1. 不可重复
+   2. 默认按照元素进行升序排列
+
+3. 遍历
+
+```c++
+set<int> number = {x, x, x, x, ...};  
+
+// 迭代器, it 类型为 set<int>::iterator
+auto it = number.begin();
+while (it != number.end()) {
+    xxxxx;
+    ++it;
+}
+
+// 增强 for 循环, nu 为 int
+for (auto& nu : number) {
+    xxx;
+}
+```
+
+4. 基本操作
+
+```c++
+// 查找出现次数, 存在返回 1, 否则 0
+xxx.count();
+
+// 查找出现位置, 存在则返回 指向该元素的迭代器, 否则返回 尾后迭代器(end())
+set<int>::iterator it = xxx.find()
+
+/***************************************************************/
+
+// 插入一个元素, 返回值为 pair<set<int>::iterator, bool> 
+// 若已存在元素, 则插入失败
+// pair 第一项为 指向元素的迭代器, 第二项表示 插入成功/失败
+auto ret = xxx.insert(xx); 
+
+// 插入一组元素, 参数为插入元素的 首地址 / 尾后地址
+int arr[4] = {1, 2, 3, 4}:
+xxx.insert(arr, arr+4);
+
+
+
+```
+
+## pair
+```c++
+#include <utility>
+using std::pair;
+
+pair<int, string> number = {1, "Wangdao"};
+
+// 取值
+number.first;
+number.second;
+
+```
+
+
+
+
 
 
 

@@ -85,7 +85,7 @@
 # gdb 调试
 
 
-# 进程间通信(IPC)_有名管道(named pipe)
+# 进程间通信_有名管道(named pipe)
 
 ## 概述
 1. 有名 即 在文件系统中存在, but 该文件只能用于通信, 不能存储数据, 也不能用 vim 打开
@@ -117,6 +117,7 @@
 
 ## 方式 1 (库函数)
 ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309182203589.png)
+
 1. 打开管道: `FILE* popen(const char* command, const char* type)`
     1. 根据 **command**, 启动一个子进程 (让子进程执行命令, 并将父子进程连通)
     2. 父子进程间存在一条通道
@@ -129,11 +130,81 @@
 3. 关闭管道: `fclose()`
 
 ## 方式 2 (系统调用)
+![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309182223327.png)
 
 1. `int pipe(int pipefd[2])`
+    1. 数组作为参数 会退化为指针, 2 只是起提示作用
+    1. 整数数组用于储存 父子进程通信的 fd
+    2. 数组中 第 0 项 为 R 端, 第 1 项 为 W 端
+    3. 管道为 半双工, but 一般 单工使用
+
+2. 创建子线程: `fork()`
+
+3. 父进程关闭一端, 子进程关闭另一端, 使其成为单工
+
+## 性质 (同有名管道)
+
+1. 读阻塞
+
+2. 写阻塞
+
+3. 写端关闭, 读端返回 0
+
+4. 读端关闭, 写入引发 `SIGPIPE`, 异常终止
+
+## 管道缺点
+1. 当 n 个进程进行通信时, 需要建的管道量级为 n<sup>2</sup> 
+2. 管道存在 阻塞 问题
+
+
 
 
 # 进程间通信_共享内存
+1. 特点
+    1. 最快的 IPC (InterProcess communication);  
+    2. 打破了部分 内存隔离性, 让不同进程的虚拟页映射到同一物理页;  
+    3. 不需拷贝;
+
+2. 步骤
+    1. 让 OS 分配 共享的物理内存  
+        `int shmget(key_t key, size_t size, int shmflag)`
+
+        1. 返回 共享内存 id
+        2. key 用于不同进程  定位 同一页共享内存  
+            key = 0 (IPC_PRIVATE) 表示为 私有共享内存, 适用于父子进程 (`shmget() / shmat() / fork() ... `)
+        3. size 为虚拟内存大小, 取 页的整数倍, 即 **n \* 4096B**
+        4. shmflag 为 `IPC_CREAT | 0600`, 表示 不存在则创建 且 用户自己可读可写
+
+    2. 让共享的 物理内存 加载到 进程地址空间 (分配虚拟内存)  
+        `void* shmat(int shmid, const char* shmaddr, int shmflag)`
+
+        1. 返回 虚拟内存首地址
+        2. shmaddr 为 NULL
+        3. shmflag 为 0
+
+    3. 进程访问分配的内存
+
+    4. 释放虚拟内存  
+        `int shmdt(const void* shmaddr)`
+
+## 缺点
+存在竞争条件(race condition), 即 两个并发的执行流访问共享资源时 寄存器数据 跟不上 内存变量  
+```shell
+#单核运行
+taskset -c 0 ...
+```
+
+## 补充: 
+```shell
+# 查看已存在的共享内存
+ipcs 
+
+# 删除共享内存, 延迟删除, nattach 为 0 时真正删除
+ipcrm -a            # 全删 
+ipcrm -m shmid
+ipcrm -M key
+```
+
 
 
 # 进程间通信_信号

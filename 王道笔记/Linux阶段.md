@@ -118,7 +118,7 @@
 ## 方式 1 (库函数)
 ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309182203589.png)
 
-1. 打开管道: `FILE* popen(const char* command, const char* type)`
+1. 打开管道: `FILE* popen(const char* command, const char* type);`
     1. 根据 **command**, 启动一个子进程 (让子进程执行命令, 并将父子进程连通)
     2. 父子进程间存在一条通道
     3. type 表示 父进程管道的类型  
@@ -127,12 +127,12 @@
 
 2. 读写: `fread() / fwrite()`
 
-3. 关闭管道: `fclose()`
+3. 关闭管道: `fclose();`
 
 ## 方式 2 (系统调用)
 ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309182223327.png)
 
-1. `int pipe(int pipefd[2])`
+1. `int pipe(int pipefd[2]);`
     1. 数组作为参数 会退化为指针, 2 只是起提示作用
     1. 整数数组用于储存 父子进程通信的 fd
     2. 数组中 第 0 项 为 R 端, 第 1 项 为 W 端
@@ -167,7 +167,7 @@
 
 2. 步骤
     1. 让 OS 分配 共享的物理内存  
-        `int shmget(key_t key, size_t size, int shmflag)`
+        `int shmget(key_t key, size_t size, int shmflag);`
 
         1. 返回 共享内存 id
         2. key 用于不同进程  定位 同一页共享内存  
@@ -176,7 +176,7 @@
         4. shmflag 为 `IPC_CREAT | 0600`, 表示 不存在则创建 且 用户自己可读可写
 
     2. 让共享的 物理内存 加载到 进程地址空间 (分配虚拟内存)  
-        `void* shmat(int shmid, const char* shmaddr, int shmflag)`
+        `void* shmat(int shmid, const char* shmaddr, int shmflag);`
 
         1. 返回 虚拟内存首地址
         2. shmaddr 为 NULL
@@ -185,7 +185,7 @@
     3. 进程访问分配的内存
 
     4. 释放虚拟内存  
-        `int shmdt(const void* shmaddr)`
+        `int shmdt(const void* shmaddr);`
 
 ## 缺点
 存在竞争条件(race condition), 即 两个并发的执行流访问共享资源时 寄存器数据 跟不上 内存变量  
@@ -208,6 +208,53 @@ ipcrm -M key
 
 
 # 进程间通信_信号
+
+## 特点
+1. 信号是 软件层面 的 事件机制
+2. 事件分为 同步 / 异步
+3. 硬件层面 的是 中断
+3. 信号的目标 总是 进程
+
+## 信号处理阶段
+1. 产生信号
+    1. 硬件产生, 异步: `ctrl + c` / `ctrl + \` 
+    2. 硬件产生, 同步: `除 0 错误` 
+    3. 软件产生, 异步: `kill` 
+    4. 软件产生, 同步: `abort()`  
+    
+2. 递送信号 (delivery)
+    1. 中止: `Term`
+    2. 忽略: `Ign`
+    3. 中止并生成 Core 文件: `Core`
+    4. 暂停: `Stop`
+    5. 恢复: `Cont`
+
+## 注册信号
+即 修改信号的 默认递送行为
+
+1. 函数 1 (可读性较差)  
+    `void (*signal(int sig, void (*func)(int)))(int);`
+    1. 返回值: 返回值为 void, 参数为 int 的 **函数指针**
+    2. 参数1: 整数
+    3. 参数2: 返回值为 void, 参数为 int 的 **函数指针**
+
+2. 函数2   
+    `typedef void (*sighandler_t)(int);`  
+    `sighandler_t signal(int signum, sighandler_t handler);`
+    1. handler 为用户自己定义的递送函数, 由 OS 调用, 是为回调函数
+    2. handler 为 `SIG_DFL`, 即采用信号的 默认递送行为
+
+
+## 信号递送的核心数据结构
+1. mask 掩码, 表示 某个过程中是否屏蔽了某个信号
+2. pending 位图, 表示 是否存在未决信号 
+3. 信号传入, 首先看 mask 是否屏蔽了该信号  
+    若没有屏蔽, 则直接递送;  
+    若屏蔽了, 则 将其先 移入 pending; 当 mask 从 有-->空 时, 看 pending, 有则取出递送
+    ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/Snipaste_2023-09-18_23-54-29.png)
+
+## signal 性质
+
 
 
 # 多线程创建子线程

@@ -1,6 +1,4 @@
-[TOC]
-
-
+# C++ 组件
 
 ## 字符串
 
@@ -72,8 +70,6 @@
         ...
     }
     ```
-
-
 
 ## Vector
 
@@ -156,16 +152,11 @@
 1. Vector 底层实现 (**`面试必考`**)
 
     1. 由 3 个指针构成
-    1. `_start` 指向当前数组中第一个元素存放的位置 
-    1. `_finish` 指向当前数组中最后一个元素存放的下一个位置 
-    1. `_end_of_storage` 指向当前容器存放的最后一个元素的下一个位置
-    1. vector 中的元素存在 堆上
-    
-     ![image-20230908175603277](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/image-20230908175603277.png)
-    
-    
-
-
+    2. `_start` 指向当前数组中第一个元素存放的位置
+    3. `_finish` 指向当前数组中最后一个元素存放的下一个位置
+    4. `_end_of_storage` 指向当前容器存放的最后一个元素的下一个位置
+    5. vector 中的元素存在 堆上
+        ![image-20230908175603277](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/image-20230908175603277.png)
 
 ## 输入输出流
 
@@ -212,7 +203,7 @@
 1. 缓冲机制
     1. 全缓冲
     1. 行缓冲: `cout` 既支持 行缓冲 也支持 满缓冲; `cin` 的返回值为 `cin`
-    1. 非缓冲: `cerr` 
+    1. 非缓冲: `cerr`
 
 1. 禁止隐式转换: `explicit xxx`, 放在构造函数前
 
@@ -228,14 +219,11 @@
     // 直接刷新缓冲区 
     flush;
     ```
-    
-     
-
-
 
 ## 文件 IO
 
 1. 构造
+
     ```c++
     using std::ifstream;
     
@@ -255,8 +243,9 @@
     explicit ifstream(const char* filename, openmode mode = in);
     explicit ifstream(const string & filename, openmode mode = in);
     ```
-    
+
 1. 文件模式 (位图)
+
     ```c++
     // 输入, 读操作；如果文件不存在, 打开失败
     std::ios::in;
@@ -276,16 +265,16 @@
     // 二进制, 读取或写入文件的数据为二进制形式
     std::ios::binary;
     ```
-    
+
 1. 文件游标位置
-   
+
     ```c++
     // 读模式获取文件游标位置
     xxx.tellg();
     
     // 读模式设置游标位置
-    xxx.seekg(偏移量); 	 // 绝对位置
-    xxx.seekg(偏移量, 锚点);	// 相对位置
+    xxx.seekg(偏移量);          // 绝对位置
+    xxx.seekg(偏移量, 锚点);    // 相对位置
     
     /***************************************/
     
@@ -296,11 +285,11 @@
     
     /***************************************/
     // 锚点
-    std::ios::beg;	// 文件开头
-    std::ios::cur;	// 当前位置
-    std::ios::end;	// 文件末尾
+    std::ios::beg;  // 文件开头
+    std::ios::cur;  // 当前位置
+    std::ios::end;  // 文件末尾
     ```
-    
+
 1. 读写
 
     ```c++
@@ -321,11 +310,10 @@
     xxx.write(buff, strlen(buf));
     ```
 
-
-
 ## 字符串 IO
 
 1. aa
+
     ```c++
     #include <sstream>
     using std::istringstream;
@@ -356,18 +344,18 @@
 #include <log4cpp/BasicLayout.hh>
 #include <log4cpp/PatternLayout.hh>
 
-log4cpp::BasicLayout();						// 默认的格式
-log4cpp::PatternLayout();					// 定制化格式
+log4cpp::BasicLayout();                     // 默认的格式
+log4cpp::PatternLayout();                   // 定制化格式
 布局对象.setConversionPattern("...");
 
 目的地对象.setLayout(布局对象);
 
-/* 	布局
+/*  布局
 %%  表示百分号
 %c  表示Category对象的名字
 %d  表示日期, 还有更细粒度的
-	%d{%H:%M:%S,%l}
-	%d{%d %m %Y %H:%M:%S,%l}
+    %d{%H:%M:%S,%l}
+    %d{%d %m %Y %H:%M:%S,%l}
 %m  表示日志本身
 %n  表示换行符
 %p  表示优先级
@@ -385,9 +373,9 @@ log4cpp::PatternLayout();					// 定制化格式
 
 log4cpp::OstreamAppender(..., &cout);
 log4cpp::FileAppender(..., filename);
-log4cpp::RollingFileAppender(..., filename, 				// 回卷文件
-                             maxFileSize = 10*1024*1024, 	// 每个文件大小
-                             maxBackupIndex = 1, ...);		// 备份的回卷文件个数
+log4cpp::RollingFileAppender(..., filename,                 // 回卷文件
+                             maxFileSize = 10*1024*1024,    // 每个文件大小
+                             maxBackupIndex = 1, ...);      // 备份的回卷文件个数
 
 源对象.addAppender(目的地对象);
 
@@ -396,8 +384,8 @@ log4cpp::RollingFileAppender(..., filename, 				// 回卷文件
 // 创建模块对象, 日志记录器（来源）
 #include <log4cpp/Category.hh>
 
-log4cpp::Category::getRoot();			// root 对象
-log4cpp::Category::getInstance();		// 叶对象
+log4cpp::Category::getRoot();           // root 对象
+log4cpp::Category::getInstance();       // 叶对象
 
 // 使用 categroy 对象必须先创建 root 对象, 再创建叶对象
 // 如果没有显式创建根对象, 直接去创建叶对象也会自动创建出一个根对象(建议显式创建, 因为显式创建根对象可以设置根对象的优先级、目的地)
@@ -415,11 +403,13 @@ log4cpp::Category::getInstance();		// 叶对象
 
 /*********************************************************************/
 
-log4cpp::Category::shutdown();	
+log4cpp::Category::shutdown();
 ```
+
 ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309111445616.png)
 
 ### 头文件
+
 ```c++
 // 头文件
 
@@ -439,54 +429,48 @@ log4cpp::Category::shutdown();
 #include <log4cpp/Priority.hh>
 ```
 
-
-
 ### 1.创建 布局对象 并 设置布局
 
 ```c++
 // 1.创建 布局对象 并 设置布局
-log4cpp::BasicLayout();						// 默认的格式, 不需要再单独设置
-log4cpp::PatternLayout();					// 定制化格式, 需设置布局
+log4cpp::BasicLayout();                     // 默认的格式, 不需要再单独设置
+log4cpp::PatternLayout();                   // 定制化格式, 需设置布局
 布局对象.setConversionPattern("%d %c [%p]: %m%n");
     
-/*	布局
+/*  布局
 %%  表示百分号
 %c  表示Category对象的名字
 %d  表示日期, 默认 {%Y-%m-%d %H:%M:%S,%l}
-	%d{%H:%M:%S,%l}
-	%d{%d %m %Y %H:%M:%S,%l}
+    %d{%H:%M:%S,%l}
+    %d{%d %m %Y %H:%M:%S,%l}
 %m  表示日志本身
 %n  表示换行符
 %p  表示优先级
 /*
 ```
 
-
-
-### 2.创建 目的地对象 并 绑定布局    
+### 2.创建 目的地对象 并 绑定布局
 
 ```c++
 // 2.创建 目的地对象 并 绑定布局
 log4cpp::OstreamAppender(..., &cout);
 log4cpp::FileAppender(..., filename);
-log4cpp::RollingFileAppender(..., filename, 				// 回卷文件
-                             maxFileSize = 10*1024*1024, 	// 每个文件大小
-                             maxBackupIndex = 1, ...);		// 备份的回卷文件个数
+log4cpp::RollingFileAppender(..., filename,                 // 回卷文件
+                             maxFileSize = 10*1024*1024,    // 每个文件大小
+                             maxBackupIndex = 1, ...);      // 备份的回卷文件个数
 目的地对象.setLayout(布局对象);
 ```
-
-
 
 ### 3.创建 源对象 并 设置优先级 / 绑定目的地
 
 ```c++
 // 3.创建 源对象 并 设置优先级 / 绑定目的地
-log4cpp::Category::getRoot();			// root 对象
-log4cpp::Category::getInstance();		// 叶对象
+log4cpp::Category::getRoot();       // root 对象
+log4cpp::Category::getInstance();   // 叶对象
 源对象.setPriority();
 源对象.addAppender(目的地对象);
     
-/*	优先级
+/* 优先级
 Priority::EMERG;
 Priority::FATAL;
 Priority::ALERT;
@@ -499,16 +483,12 @@ Priority::DEBUG
 */
 ```
 
-
-
 ### 4.输出日志
 
 ```c++
 // 4.输出日志
 ...
 ```
-
-
 
 ### 5.日志系统退出
 
@@ -517,16 +497,12 @@ Priority::DEBUG
 log4cpp::Category::shutdown();
 ```
 
-
-
 ### 编译
 
 ```c++
 // 编译
 // g++ log4cpptest.cc -llog4cpp -lpthread
 ```
-
-
 
 ## 友元函数
 
@@ -535,8 +511,8 @@ log4cpp::Category::shutdown();
 1. 分类
 
     1. 普通函数
-    
-    1. 另一个类的成员函数 (不推荐)
+    2. 另一个类的成员函数 (不推荐)
+
         ```c++
         // B 是 A 的朋友, 即 A 中存在 friend xxx B::func(const A& xxx);
         
@@ -545,7 +521,7 @@ log4cpp::Category::shutdown();
         // 3.A 定义(不要忘记声明友元函数, 加 friend)
         // 4.类外实现 B 的友元成员函数
         
-        /*	前向声明 
+        /*  前向声明 
         1.只进行了前向声明的类不能创建对象
         2.可以用于定义指向这个类型的 ==指针== 和 ==引用==
         3.可以用于声明使用该类型作为 ==形参== 的函数
@@ -560,7 +536,7 @@ log4cpp::Category::shutdown();
         class B {
         public:
             xxx func(const A& xxx);
-        	...
+            ...;
         }
         
         // 3.原类 定义
@@ -577,17 +553,13 @@ log4cpp::Category::shutdown();
         }
         
         ```
-        
-    1. 友元类
-    
-1. 友元特点
+
+    3. 友元类
+
+2. 友元特点
     1. 友元不受类中访问权限的限制
     1. 友元破坏了类的 封装性
     1. 不能滥用友元, 友元的使用受到限制 (单向、不具备传递性、不能被继承)
-
-
-
-
 
 ## 运算符重载
 
@@ -595,32 +567,28 @@ log4cpp::Category::shutdown();
 
 1. 规则
     1. 运算符重载时, 其操作数型必须要是 **自定义类型**
-    1. 其 **优先级** 和 **结合性** 还是固定不变的
-    1. 操作符的 **操作数个数** 是保持不变的 
-    1. 运算符重载时, **不能设置默认参数** (如果设置默认值, 其实也就是改变了操作数的个数)
-    1. 逻辑与&& / 逻辑或|| 就 **不再具备短路求值特性**, 进入函数体之前必须完成所有函数参数的计算, 不推荐重载
-    1. 不能臆造一个并不存在的运算符
+    2. 其 **优先级** 和 **结合性** 还是固定不变的
+    3. 操作符的 **操作数个数** 是保持不变的
+    4. 运算符重载时, **不能设置默认参数** (如果设置默认值, 其实也就是改变了操作数的个数)
+    5. 逻辑与&& / 逻辑或|| 就 **不再具备短路求值特性**, 进入函数体之前必须完成所有函数参数的计算, 不推荐重载
+    6. 不能臆造一个并不存在的运算符
 
 1. 形式
     1. 友元: 不会修改 操作数值的运算符, `xxx& operator+(const xxx&, const xxx&);`; 特例: 输入/出流运算符
-       1. **普通友元函数**: 
-       2. 友元成员函数 
+       1. **普通友元函数**:
+       2. 友元成员函数
        3. 友元类
 
     2. 普通函数
 
     3. **成员函数**: 修改操作数值的运算符, 如 `+=`; 成员函数存在一个默认参数 `this` 指针
 
-
-
 ### `+=`
 
-    ```c++
-    // += 
-    Complex& operator+=(const Complex& ) {};
-    ```
-
-
+```c++
+// += 
+Complex& operator+=(const Complex& ) {};
+```
 
 ### 自增运算符 `++`
 
@@ -643,8 +611,6 @@ Complex operator++(int) {
 };
 ```
 
-
-
 ### 函数调用运算符 `()`
 
 ```c++
@@ -654,13 +620,13 @@ operator()() {
     
 }
 
-/*	函数对象相比普通函数的优势
+/* 函数对象相比普通函数的优势
 1. 可以携带状态
 2. 函数对象可以作为函数参数
 3. 函数对象可以有更多的行为：
 */
 /*--------------------------------------------------------*/
-//	函数也可以看作对象
+// 函数也可以看作对象
 // 例: 
 void func(int);
 // fun 类型为 void (*)(int) 的函数指针
@@ -670,8 +636,6 @@ Function p = func;
 // 则 p 可以看作一个对象, 它所属的类为 Function
 ```
 
-
-
 ### 成员指针访问运算符  `.* / ->*`
 
 ```c++
@@ -679,14 +643,14 @@ Function p = func;
 
 // 成员函数对象
 struct FFF {
-    void print() {}			// print() 为公有成员函数
+    void print() {}         // print() 为公有成员函数
 }
 typedef void (FFF::*MemberFunction)();
 
 // 1 .* 成员指针访问运算符 形式1, 此处右操作数为指针
-MemberFunction mf = &FFF::print;	// 此处 & 不能省略
-FFF fff;							// 先有对象才能调用非静态成员函数
-(fff.*mf)();						// 此处 * 不能省略
+MemberFunction mf = &FFF::print;    // 此处 & 不能省略
+FFF fff;                            // 先有对象才能调用非静态成员函数
+(fff.*mf)();                        // 此处 * 不能省略
 
 // 2 ->* 成员指针访问运算符 形式2, 此处右操作数为指针
 // but 当 fp = nullptr 时 仍有可能正常运行(前提: 不访问数据成员)
@@ -698,8 +662,6 @@ fp->display();
 // C+中“函数"多种形式：普通函数/函数指针/成员函数/成员函数指针/函数对象
 // 将它们统称为可调用实体
 ```
-
-
 
 ### 下标访问运算符 `[]`
 
@@ -731,9 +693,7 @@ const char& operator[](size_t idx) const {
 }
 ```
 
-
-
-### 输入输出流运算符 
+### 输入输出流运算符
 
 ```c++
 // 输入输出流运算符 
@@ -764,8 +724,6 @@ void readIn(istream& is, int& num) {
 }
 ```
 
-
-
 ### 箭头运算符 `->`
 
 ```c++
@@ -786,8 +744,6 @@ ml->getData();
 
 ```
 
-
-
 ### 解引用运算符 `*`
 
 ```c++
@@ -805,7 +761,6 @@ MiddleLayer ml(new Data);
     
 // 智能指针的实现原理：通过对象的生命周期来管理资源。当对象被销毁, 一定会自动调用析构函数, 只要把析构函数设置好, 就不会内存泄漏。
 ```
-
 
 ### 三层箭头 `->`
 
@@ -858,9 +813,10 @@ ThirdLayer tl(new MiddleLayer(new Data));
 ### 类型转换函数
 
 1. 其他类型 向 自定义类型 转换 (隐式转换)  
-先调用构造函数得到临时对象, 再赋值, 表层体现 只调用 赋值函数
+    先调用构造函数得到临时对象, 再赋值, 表层体现 只调用 赋值函数
 
 2. 自定义类型 向 其他类型 转换
+
 ```c++
 // 形式: operator 目标类型(){} 
 /*  性质
@@ -889,27 +845,28 @@ operator Complex() {
 // 若 特殊构造 参数无 const, 则 2 / 3 冲突
 // 类型转换 参数为 this 指针, 可能会修改 Point 的值
 // 特殊构造参数为 const Point&, 不会修改; 即 类型转换不存在, 或者 Point 为 const 时执行
-
-
 ```
-
 
 ## 类域
 
 ### 全局作用域  
+
 在函数和其他类定义的外部定义的类(全局位置)称为全局类, 绝大多数的C++类是定义在该作用域中, 我们在前面定义的所有类都是在全局作用域中, 全局类具有全局作用域
 
 ### 类作用域
 
 #### 概述
+
 1. 一个类可以定义在另一类的定义中, 这是所谓嵌套类或者内部类  
 2. 内部类本身 不占用 外部类 的存储空间
 3. 内部类 是 外部类 的 友元类; 可以直接访问 外部类的 静态成员, 私有成员需要通过对象访问
 4. 内部类的静态成员需要在 全局位置 声明, 且加上外部类的作用域限定
-![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309141552588.png)
+    ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309141552588.png)
 
 #### PIMPL 设计模式
+
 (Private Implementation 或 Pointer to Implementation)
+
 1. 优点
     1. 提高编译速度
     2. 实现信息隐藏
@@ -918,6 +875,7 @@ operator Complex() {
     5. 移动语义友好
 
 #### 隐藏实现细节
+
 ```shell
 # 安装
 sudo apt install build-essential
@@ -934,6 +892,7 @@ g++ TestLine.cc -L. -lLine
 ```
 
 #### 单例的自动释放 (单独友元类)
+
 ```c++
 // 方式 1
 // 创建 AutoRelease 对象, 数据成员为 Singleton* (即指向堆上的单例对象)
@@ -986,6 +945,7 @@ AutoRelease ar(Singleton::getInstance());
 ```
 
 #### 单例的自动释放 (静态对象 + 嵌套类)
+
 ```c++
 // 方式 2
 // 可以正常使用 destory
@@ -1023,6 +983,7 @@ Singleton::AutoRelease Singleton::_ar;
 ```
 
 #### 单例的自动释放 (atexit 注册函数)
+
 ```c++
 // atexit(函数指针), 被注册的函数在进程终止时调用, 先注册的后执行
 // 注册 destory 函数, 可以正常使用 destory
@@ -1057,6 +1018,7 @@ Singleton* Singleton::_pInstance = getInstance();
 ```
 
 #### 单例的自动释放 (pthread_once Linux平台)
+
 ```c++
 // pthread_once(..., 函数指针), 确保函数只会被调用一次
 // but 单例对象 被手动销毁后无法再创建, 解决方案 destory 私有
@@ -1090,8 +1052,6 @@ pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
     
 ```
 
-
-
 ## string 底层实现
 
 1. 信息
@@ -1102,6 +1062,7 @@ pthread_once_t Singleton::_once = PTHREAD_ONCE_INIT ;
 ### 深拷贝
 
 ### 写时复制 (COW-CopyOnWrite)
+
 引用计数  
 ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309151100067.png)
 
@@ -1281,50 +1242,14 @@ ostream& operator<<(ostream& os, const CowString& rhs) {
 
 ```
 
-
-
 ### 短字符串优化 (SSO-Short String Optimization)
+
 1. 概述  
-字符串的长度小于等于15个字节时, buffer直接存放整个字符串;   
+字符串的长度小于等于15个字节时, buffer直接存放整个字符串;  
 当字符串长度大于15个字节时, buffer存放的是一个指针, 指向堆空间的区域;  
 **注意:** 对象地址 指向低地址, 内容地址 指向高地址
 ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202309151635349.png)
 
 2. 当在栈上创建字符串时
-    1. len <= 15, str内容分布在栈上; 
+    1. len <= 15, str内容分布在栈上;
     2. len > 15, str内容分布在堆上;  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

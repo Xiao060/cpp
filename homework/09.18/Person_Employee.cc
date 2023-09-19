@@ -49,7 +49,6 @@ public:
         _totalSalary += _salary;
         ++_totalNum;
     }
-
     
     ~Employee() {
         _totalSalary -= _salary;
@@ -61,6 +60,22 @@ public:
         cout << "department: " << _department << endl
              << "salary: " << _salary << endl;
     }
+
+    // TODO:
+    // 自复制, 需要修改 Person 部分 
+    Employee& operator=(const Employee& rhs) {
+        // 显式调用 基类的 赋值运算符函数
+        Person::operator=(rhs);
+
+        _totalSalary -= _salary;
+
+        _salary = rhs._salary;
+        _department = rhs._department;
+
+        _totalSalary += _salary;
+        return *this;
+    }
+
 
     // 静态成员函数
     static double aveSalary() {

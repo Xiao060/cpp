@@ -35,7 +35,24 @@ public:
     Employee(const char* name, int age, int department, int salary) 
     : Person(name, age)
     , _department(department)
-    , _salary(salary) {}
+    , _salary(salary) {
+        _totalSalary += _salary;
+        ++_totalNum;
+    }
+
+    Employee(const Employee& rhs) 
+    : Person(rhs)
+    , _department(rhs._department)
+    , _salary(rhs._salary) {
+        _totalSalary += _salary;
+        ++_totalNum;
+    }
+
+    
+    ~Employee() {
+        _totalSalary -= _salary;
+        --_totalNum;
+    }
 
     void display() {
         Person::display();
@@ -43,12 +60,20 @@ public:
              << "salary: " << _salary << endl;
     }
 
+    // 静态成员函数
+    static double aveSalary() {
+        return _totalSalary / _totalNum;
+    }
 
 private:
     int _department;
-public:
     int _salary;
+    static double _totalSalary;
+    static int _totalNum;
 };
+
+double Employee::_totalSalary = 0;
+int Employee::_totalNum = 0;
 
 
 int main(int argc, char* argv[]) {
@@ -64,9 +89,8 @@ int main(int argc, char* argv[]) {
     Employee c("XiaoGang", 35, 8, 7000);
     c.display();
     cout << endl;
-    
-    double average = (a._salary + b._salary + c._salary) / 3.0;
-    cout << "average salary: " << average << endl;
+
+    cout << "average: " << Employee::aveSalary() << endl;
 
     return 0;
 }

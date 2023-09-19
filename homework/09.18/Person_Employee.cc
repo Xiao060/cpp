@@ -36,6 +36,7 @@ public:
     : Person(name, age)
     , _department(department)
     , _salary(salary) {
+
         _totalSalary += _salary;
         ++_totalNum;
     }
@@ -44,6 +45,7 @@ public:
     : Person(rhs)
     , _department(rhs._department)
     , _salary(rhs._salary) {
+
         _totalSalary += _salary;
         ++_totalNum;
     }

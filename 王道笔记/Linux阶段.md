@@ -250,9 +250,12 @@ ipcrm -M key
     若屏蔽了, 则 将其先 移入 pending; 当 mask 从 有-->空 时, 看 pending, 有则取出递送
     ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/Snipaste_2023-09-18_23-54-29.png)
 
-### signal 性质
+## signal 性质
+1. 一次注册, 永久生效
+2. 
 
-## 多线程创建子线程
+
+# 多线程创建子线程
 
 ## 多线程子线程的终止
 

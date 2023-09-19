@@ -35,5 +35,11 @@ int main( void ) {
     pa2->FuncB();
     delete pa2;
 
+    printf("\n");
+    A *pa3 = new B;
+    pa3->FuncA();           // (5)
+    pa3->FuncB();
+    delete pa3;
+
     return 0;
 }

@@ -229,17 +229,35 @@ ipcrm -M key
 
 即 修改信号的 默认递送行为
 
-1. 函数 1 (可读性较差)  
+1. 函数 1.1 (可读性较差)  
     `void (*signal(int sig, void (*func)(int)))(int);`
     1. 返回值: 返回值为 void, 参数为 int 的 **函数指针**
     2. 参数1: 整数
     3. 参数2: 返回值为 void, 参数为 int 的 **函数指针**
 
-2. 函数2
+2. 函数 1.2
     `typedef void (*sighandler_t)(int);`  
     `sighandler_t signal(int signum, sighandler_t handler);`
     1. handler 为用户自己定义的递送函数, 由 OS 调用, 是为回调函数
     2. handler 为 `SIG_DFL`, 即采用信号的 默认递送行为
+
+3. 函数 2
+    `int sigaction(int signum, const struct sigaction* act, struct sigaction* oldact);`  
+
+    ```c++
+    struct sigaction {
+        void (*sa_handler)(int);
+        void (*sa_sigaction)(int, siginfo_t*, void*);
+        sigset_t sa_mask;
+        int sa_flags;
+        void (*sa_restorer)(void);
+    } 
+    ```
+
+    1. act 为要设置的新属性; oldact 用来保存旧的属性, 不保存可填 NULL
+    2. `struct sigaction` 结构
+        1. `sa_handler / sa_sigaction` 为回调函数, 只能存在一个
+        2. `sa_mask` e
 
 ### 信号递送的核心数据结构
 
@@ -251,11 +269,14 @@ ipcrm -M key
     ![](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/Snipaste_2023-09-18_23-54-29.png)
 
 ## signal 性质
+
 1. 一次注册, 永久生效
-2. 
+2. 在递送信号时, 会**临时**屏蔽**本信号**, 不会屏蔽其他信号  
+    sigprocmask 加上后是永久屏蔽
+3. 进程因为**低速系统调用**而阻塞, 信号传递完成后会**自动重启**  
+    低速系统调用指 有可能陷入永久阻塞的系统调用, 如 `read()`
 
-
-# 多线程创建子线程
+## 多线程创建子线程
 
 ## 多线程子线程的终止
 

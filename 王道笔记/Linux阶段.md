@@ -257,11 +257,17 @@ ipcrm -M key
     1. act 为要设置的新属性; oldact 用来保存旧的属性, 不保存可填 NULL
     2. `struct sigaction` 结构
         1. `sa_handler / sa_sigaction` 为回调函数, 只能存在一个
-        2. `sa_mask` e
+        2. `sa_mask` 额外临时屏蔽
+        3. `sa_flags`  属性
+            1. `0` 使用回调函数 1
+            2. `SA_SIGINFO` 使用回调函数 2 传递 info 信息
+            3. `SA_RESTART` 自动重启低速设备
+            4. `SA_RESETHAND` 生效一次
+            5. `SA_NODEFER` 递送时不屏蔽本信号
 
 ### 信号递送的核心数据结构
 
-1. mask 掩码, 表示 某个过程中是否屏蔽了某个信号
+1. mask 掩码, 表示 某个过程 是否屏蔽了 某个信号
 2. pending 位图, 表示 是否存在未决信号
 3. 信号传入, 首先看 mask 是否屏蔽了该信号  
     若没有屏蔽, 则直接递送;  
@@ -275,6 +281,12 @@ ipcrm -M key
     sigprocmask 加上后是永久屏蔽
 3. 进程因为**低速系统调用**而阻塞, 信号传递完成后会**自动重启**  
     低速系统调用指 有可能陷入永久阻塞的系统调用, 如 `read()`
+
+## sigaction 默认性质
+
+1. 一次注册, 永久生效 --------------> `SA_RESETHAND`
+2. 递送过程临时屏蔽不能信号 ---------> `SA_NODEFER`
+3. **不会** 自动重启低速设备 -------> `SA_RESTART`
 
 ## 多线程创建子线程
 

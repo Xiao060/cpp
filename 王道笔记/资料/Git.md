@@ -14,8 +14,6 @@ git config --global user.email johndoe@example.com
 git config --global core.editor neovim
 ```
 
-
-
 ## 基础命令
 
 <img src="https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/202308261126199.png" style="zoom: 80%;" />
@@ -55,8 +53,6 @@ git reflog
 
 git checkout -- filename   xxxxxxxxxx
 ```
-
-
 
 ## 分支
 
@@ -126,8 +122,6 @@ git branch -d branch_name
 
 ```
 
-
-
 ## 同步
 
 ```shell
@@ -159,15 +153,12 @@ git remote -v
 git remote rm origin_name
 ```
 
-
-
 ![image-20230826122102802](https://xiao060.oss-cn-hangzhou.aliyuncs.com/md/image-20230826122102802.png)
 
-# ssh
+## ssh
 
 ```shell
 ssh-keygen -t rsa -C "email"
 ssh -T git@github.com
 
 ```
-

@@ -1,10 +1,15 @@
+# STL
+
 ## set
+
 ### 特征
+
 1. 不可重复
 2. 默认按照元素进行升序排列
 3. 底层实现 红黑树
 
 ### 构造
+
 ```c++
 #include <set>
 using std::set;
@@ -22,6 +27,7 @@ set<int> number = {x, x, x, x, ...};
 ```
 
 ### 遍历
+
 ```c++
 set<int> number = {x, x, x, x, ...};  
 
@@ -39,6 +45,7 @@ for (auto& nu : number) {
 ```
 
 ### 基本操作
+
 ```c++
 // 查找出现次数, 存在返回 1, 否则 0
 xxx.count();
@@ -72,7 +79,8 @@ xxx.erase(it);
 
 ```
 
-## pair 
+## pair
+
 ```c++
 #include <utility>
 using std::pair;
@@ -91,11 +99,13 @@ number.second;
 ## map
 
 ### 特点
+
    1. 存放 key-value 类型
    2. key 唯一, key 相同则插入失败 (不覆盖)
    3. 默认情况下按照 key 进行排序
 
 ### 初始化
+
 ```c++
 #include <map>
 using std::map;
@@ -108,7 +118,7 @@ map<int, string> = {{1, "Hello"},
                     make_pair(6, "shanghai")};
 ```
 
-### 遍历 
+### 遍历
 
 ```c++
 // 迭代器, 类型为 map<int, string>::iterator
@@ -130,6 +140,7 @@ for (auto& nu : number) {
 ```
 
 ### 基本操作
+
 ```c++
 // 查找出现次数, 参数为 key, 存在返回 1, 否则返回 0
 xxx.count(key);

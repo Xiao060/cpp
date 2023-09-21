@@ -17,7 +17,6 @@ T add(T a, int b) {
 }
 
 // add 后接 <> 为全特化
-// add 后不接 <> 为 模板重载 ??????
 template <>
 double add<double, int>(double a, int b) {
     return a + b;

@@ -6,15 +6,11 @@ using std::endl;
 
 int main() {
 
-    String s1;
+    String s1(String("Hello"));
     cout << s1 << endl;
 
-    String s2("Hello");
-    cout << s2 << endl;
-
-    String s3 = "World";
-    cout << s3 << endl;
-
+    String s4 = String("Fine");
+    cout << s4 << endl;
 
     return 0;
 }

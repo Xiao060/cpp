@@ -8,8 +8,7 @@ using std::ostream;
 
 class String {
 public:
-    String();
-    String(const char*);
+    String(const char* rhs = "");
     String(const String&);
     String(String&&);
     ~String();

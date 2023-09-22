@@ -2,14 +2,8 @@
 #include <iostream>
 #include "String.hh"
 
-using std::cin;
 using std::cout;
 using std::endl;
-
-String::String() 
-: _data(nullptr) {
-    cout << "String()" << endl;
-}
 
 String::String(const char* rhs) 
 : _data(new char[strlen(rhs) + 1]()) {
@@ -53,7 +47,7 @@ String& String::operator=(const String& rhs) {
 
 String& String::operator=(String&& rhs) {
     cout << "operator=(String&&)" << endl;
-    // 1. 考虑自复制
+    // 1. 考虑自复制, 为了解决 std::move()
     if (this != &rhs) {
         // 2. 释放空间
         delete [] _data;

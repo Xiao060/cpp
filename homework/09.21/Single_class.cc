@@ -1,8 +1,9 @@
 #include <cstddef>
 #include <iostream>
 #include <cstring>
+#include <assert.h>
+#include <ostream>
 
-using std::cin;
 using std::cout;
 using std::endl;
 
@@ -26,10 +27,10 @@ public:
     : _brand(nullptr)
     , _price(0) {}
 
-    Computer(char* name, int price) 
+    Computer(const char* name, int price) 
     : _brand(new char[strlen(name) + 1]())
     , _price(price) {
-        strcpy(_brand, _brand);
+        strcpy(_brand, name);
     }
 
     Computer(const Computer& rhs) 
@@ -77,65 +78,58 @@ private:
 };
 
 
-
-
-
-template <class T = int>
+template <class T>
 class Singleton {
 public:
-    template <typename K, typename ...Args>
-    Singleton& getInstance(K k, Args ...args) {
+    template <typename T1, typename T2>
+    static T* getInstance(T1 t1, T2 t2) {
         if (_pInstance == nullptr) {
-            new Singleton();
+            _pInstance = new T(t1, t2);
         }
-
         return _pInstance;
     }
 
-
-
-    void destory() {
-
+    static void destory() {
+        if (_pInstance) {
+            delete _pInstance;
+            _pInstance = nullptr;
+        }
     }
 
     Singleton(const Singleton&) = delete;
     Singleton& operator=(const Singleton&) = delete;
-
 private:
-    Singleton() 
-    : _pInstance(new T()) {}
-
-    ~Singleton() {
-        delete _pInstance;
-    }
-
-    T* _pInstance;
+    static T* _pInstance;
 };
 
+template <class T>
+T* Singleton<T>::_pInstance = nullptr;
 
-
-
-
-
-
-
-
-Point pt(1, 2);
-Point pt2(3, 4);
-
-Computer com("Mac", 8888);
+// Point pt(1, 2);
+// Point pt2(3, 4);
+// Computer com("Mac", 8888);
 
 int main(void) {
     Computer *pc1 = Singleton<Computer>::getInstance("Xiaomi", 6666);
     Computer *pc2 = Singleton<Computer>::getInstance("Xiaomi", 6666);
     assert(pc1 == pc2);
+    cout << pc1 << endl
+         << pc2 << endl;
     
-    Point* pt3 = Singleton<Point>::getInstance(1, 2);
-    Point* pt4 = Singleton<Point>::getInstance(1, 2);
+    Point *pt3 = Singleton<Point>::getInstance(1, 2);
+    Point *pt4 = Singleton<Point>::getInstance(1, 2);
     assert(pt3 == pt4);
+    cout << pt3 << endl
+         << pt4 << endl;
+
+                 
+
+
     
     return 0;
 } 
+
+
 
 
 

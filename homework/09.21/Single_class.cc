@@ -81,10 +81,10 @@ private:
 template <class T>
 class Singleton {
 public:
-    template <typename T1, typename T2>
-    static T* getInstance(T1 t1, T2 t2) {
+    template <typename ...Args>
+    static T* getInstance(Args ...args) {
         if (_pInstance == nullptr) {
-            _pInstance = new T(t1, t2);
+            _pInstance = new T(args...);
         }
         return _pInstance;
     }
@@ -98,10 +98,18 @@ public:
 
     Singleton(const Singleton&) = delete;
     Singleton& operator=(const Singleton&) = delete;
+
+private:
+    Singleton() {}
+
+    ~Singleton() {}
+
 private:
     static T* _pInstance;
 };
 
+
+// 
 template <class T>
 T* Singleton<T>::_pInstance = nullptr;
 
@@ -111,7 +119,7 @@ T* Singleton<T>::_pInstance = nullptr;
 
 int main(void) {
     Computer *pc1 = Singleton<Computer>::getInstance("Xiaomi", 6666);
-    Computer *pc2 = Singleton<Computer>::getInstance("Xiaomi", 6666);
+    Computer *pc2 = Singleton<Computer>::getInstance("HuaWei", 8888);
     assert(pc1 == pc2);
     cout << pc1 << endl
          << pc2 << endl;
@@ -122,10 +130,6 @@ int main(void) {
     cout << pt3 << endl
          << pt4 << endl;
 
-                 
-
-
-    
     return 0;
 } 
 

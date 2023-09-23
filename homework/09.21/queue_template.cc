@@ -50,6 +50,7 @@ template <typename T, size_t sz>
 int Queue<T, sz>::enqueue(const T& rhs) {
     if (!is_full()) {
         _data[_rear++] = rhs;
+        _rear %= sz;
         ++_size;
         return 0;
     }
@@ -62,6 +63,7 @@ template <typename T, size_t sz>
 int Queue<T, sz>::dequeue() {
     if (!is_empty()) {
         ++_front;
+        _front %= sz;
         --_size;
         return 0;
     }
@@ -83,7 +85,8 @@ T Queue<T, sz>::front() const {
 template <typename T, size_t sz>
 T Queue<T, sz>::back() const {
     if (!is_empty()) {
-        return _data[_rear];
+        int idx = (_rear + sz -1) % sz;
+        return _data[idx];
     }
 
     cout << "Error: the queue is empty!" << endl;

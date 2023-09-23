@@ -1,99 +1,96 @@
 #include "rss.hh"
 #include "tinyxml2.h"
 #include <iostream>
+#include <regex>
+#include <fstream>
 
 using tinyxml2::XMLDocument;
-using tinyxml2::XMLNode;
 using tinyxml2::XMLElement;
 using std::cout;
 using std::endl;
+using std::regex;
+using std::regex_replace;
+using std::ofstream;
+
+// xml 结构 
+// rss -> channel -> item1/itme2/item3/...
 
 //解析
 void RssReader::parseRss() {
+    // 加载 xml 文件
     XMLDocument doc;
     doc.LoadFile("coolshell.xml");
 
     if (doc.Error()) {
         cout << "Error: failed to open xml document!" << endl;
     }
-    cout << "success to open xml document!" << endl;
-
-
-    // xml 结构 
-    // rss -> channel -> item1/itme2/item3/...
-
 
     // 获取根节点, 即 rss
     // 此处使用 doc.FirstChildElement() 也可以
-    XMLElement* root = doc.RootElement();
-    cout << "01: " << root->Value() << endl;
-    
     // XMLElement* elem = doc.FirstChildElement();
-    // cout << "01: " << elem->Value() << endl;
+    XMLElement* root = doc.RootElement();
 
     // 获取 channel
-    XMLElement* channel = root->FirstChildElement();
-    cout << "02: " << channel->Value() << endl;
+    XMLElement* channel;
+    channel = root->FirstChildElement();
 
-    // 获取 item 
+    // 获取 item
+    XMLElement* item;
+    item = channel->FirstChildElement("item");
+    
+    // 获取 item 内部元素 title/link/descrption/content:encoded
     XMLElement* elem;
-    
-    elem = channel->FirstChildElement("item");
-    cout << "03: " << elem->Value() << endl;
+    string text;
+    regex e("<[\\s\\S]+?>");
 
-    elem = elem->FirstChildElement("title");
-    cout << "04: " << elem->Value() << ": " 
-         << elem->GetText() << endl;
+    while (item) {
+        RssItem ritem;
 
-    elem = elem->NextSiblingElement("link");
-    cout << "05: " << elem->Value() << ": "
-         << elem->GetText() << endl;
+        elem = item->FirstChildElement("title");
+        text = elem->GetText();
+        text = regex_replace(text, e, "");
+        ritem.title = text;
 
-    elem = elem->NextSiblingElement("description");
-    cout << "06: " << elem->Value() << ": "
-         << elem->GetText() << endl;
+        elem = elem->NextSiblingElement("link");
+        text = elem->GetText();
+        text = regex_replace(text, e, "");
+        ritem.link = text;
 
-    cout << "***************************************" << endl;
+        elem = elem->NextSiblingElement("description");
+        text = elem->GetText();
+        text = regex_replace(text, e, "");
+        ritem.description = text;
 
-    elem = elem->NextSiblingElement("content:encoded");
-    cout << "07: " << elem->Value() << ": "
-         << elem->GetText() << endl;
+        elem = elem->NextSiblingElement("content:encoded");
+        text = elem->GetText();
+        text = regex_replace(text, e, "");
+        ritem.content = text;
 
-    // item = item->NextSiblingElement("item");
-    // cout << "04: " << item->Value() << endl;
-    // cout << item->GetText() << endl;
-    
+        _rss.push_back(ritem);
 
+        item = item->NextSiblingElement();
+    }
 
-    // cout << x->ToElement()->Value() << endl;
-
-    // XMLElement* elem = doc.FirstChildElement();
-    // cout << "02: " << elem->Value() << endl;
-
-    // elem = elem->NextSiblingElement();
-    // cout << "03: " << elem->Value() << endl;
-
-    
-
-    // x = x->FirstChild();
-    // cout << "05: " << x->Value() << endl;
-
-    // x = x->NextSibling();
-    // cout << x->Value() << endl;
-
-    // x = x->LastChild();
-    // cout << x->Value() << endl;
-
-    // x = x->LastChild();
-    // cout << x->Value() << endl;
-
-    // x = x->LastChild();
-    // cout << x->Value() << endl;
 }
 
 
 
 //输出
 void RssReader::dump(const string & filename) {
+    ofstream ofs(filename);
 
+    int docid = 0;
+    for (auto item : _rss) {
+        ++docid;
+        ofs << "<doc>" << endl;
+        ofs << "    <docid>" << docid << "</docid>" << endl;
+        ofs << "    <title>" << item.title << "</title>" << endl;
+        ofs << "    <link>" << item.link << "</link>" << endl;
+        ofs << "    <description>" << item.description << "</description>" << endl;
+        ofs << "    <content>" << item.content << "</content>" << endl;
+        ofs << "</doc>" << endl;
+        ofs << endl;
+    }
+
+    ofs.close();
 }

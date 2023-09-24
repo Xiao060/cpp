@@ -1,7 +1,9 @@
 #include "query.hh"
+#include <algorithm>
 #include <cctype>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <set>
@@ -15,6 +17,9 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::ifstream;
+using std::make_shared;
+using std::set_intersection;
+using std::inserter;
 
 TextQuery::TextQuery(ifstream& ifs) 
 : _lines(new vector<string>) {
@@ -122,12 +127,82 @@ void runQueries(ifstream& ifs) {
 
 /*******************************************************************/
 
+Query::Query(const string& word) 
+: _query_base(new WordQuery(word)) {}
+
+ostream& operator<<(ostream& os, const Query& query) {
+    return  os << query.rep();
+}
+
+/*******************************************************************/
+
+Query operator~(const Query& query) {
+    return shared_ptr<QueryBase> (new NotQuery(query));
+}
+
+QueryResult NotQuery::eval(const TextQuery& text) const {
+    // 获取 单独 2 个行号集合
+    auto result = _query.eval(text);
+
+    auto lineNoSet = make_shared<set<line_no>> ();
+    auto beg = result.begin();
+    auto end = result.end();
+
+    auto sz = result.get_file()->size();
+    for (size_t i=1; i < sz+1; ++i) {
+
+        if (beg == end || *beg != i) {
+            lineNoSet->insert(i);
+        } else if (beg != end) {
+            ++beg;
+        }
+    }
+
+    return QueryResult(rep(), result.get_file(), lineNoSet);
+}
+
+/*******************************************************************/
+
+Query operator&(const Query& lhs, const Query& rhs) {
+    return shared_ptr<QueryBase> (new AndQuery(lhs, rhs));
+}
+
+QueryResult AndQuery::eval(const TextQuery& text) const {
+    // 获取 单独 2 个行号集合
+    auto right = _rhs.eval(text);
+    auto left = _lhs.eval(text);
+
+    // 求 交集
+    // make_shared 返回一个指定类型的 智能指针
+    auto lineNoSet = make_shared<set<line_no>> ();
+    // set_intersection 求交集, 参数分别为 开始1/结束1/开始2/结束2/目的位置
+    // inserter 构造 插入迭代器, 参数分别为 容器/开始插入位置
+    set_intersection(left.begin(), left.end(), 
+                     right.begin(), right.end(), 
+                     inserter(*lineNoSet, lineNoSet->begin()));
+    
+    return QueryResult(rep(), left.get_file(), lineNoSet);
+}
+
+/*******************************************************************/
 
 
+Query operator|(const Query& lhs, const Query& rhs) {
+    return shared_ptr<QueryBase> (new OrQuery(lhs, rhs));
+}
 
+QueryResult OrQuery::eval(const TextQuery& text) const {
+    // 获取 单独 2 个行号集合
+    auto right = _rhs.eval(text);
+    auto left = _lhs.eval(text);
 
-
-
+    // 求并集
+    // make_shared 返回一个指定类型的 智能指针
+    auto lineNoSet = make_shared<set<line_no>> (left.begin(), left.end());
+    lineNoSet->insert(right.begin(), right.end());
+    
+    return QueryResult(rep(), left.get_file(), lineNoSet);
+}
 
 
 

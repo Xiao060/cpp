@@ -45,6 +45,18 @@ public:
     QueryResult(string s, shared_ptr<vector<string>> lines, shared_ptr<set<line_no>> lineNoSet);
 
     friend ostream& print(ostream&, const QueryResult&);
+
+    auto begin() {
+        return _lineNoSet->begin();
+    }
+
+    auto end() {
+        return _lineNoSet->end();
+    }
+
+    auto get_file() {
+        return _lines;
+    }
    
 private:
     // 要查询的单词
@@ -61,66 +73,146 @@ void runQueries(ifstream&);
 
 /******************************************************************************************/
 
-/*
-
+// 抽象基类, 不希望 用户/派生类 调用 QueryBase, 故没有 public 成员
+// 通过 有元函数 Query 去使用 QueryBase
 class QueryBase {
-   
-protected:
-    
-   
-private:
-    // 纯虚函数, 设为私有 ???
-    virtual QueryResult eval(const TextQuery&) = 0;
-    virtual string rep() const = 0;
+friend class Query;
 
-   
+protected:
+    virtual ~QueryBase() = default;
+
+private:
+    // 纯虚函数
+
+    // 接收 TextQuery, 返回查询后的 QueryResult
+    virtual QueryResult eval(const TextQuery&) const = 0;
+
+    // 返回 要查询的 单词
+    virtual string rep() const = 0;
 };
+
+/******************************************************************************************/
+
+class Query {
+    friend Query operator~(const Query&);
+    friend Query operator|(const Query&, const Query&);
+    friend Query operator&(const Query&, const Query&);
+
+    friend ostream& operator<<(ostream&, const Query&);
+
+public:
+    Query(const string&);
+
+    // 通过 智能指针成员 使用 QueryBase 的 eval/rep
+    QueryResult eval(const TextQuery& t) const {
+        return _query_base->eval(t);
+    }
+    string rep() const {
+        return _query_base->rep();
+    }
+
+private:
+    // 构造函数
+    Query(shared_ptr<QueryBase> query_base)
+    : _query_base(query_base) {}
+
+private:
+    shared_ptr<QueryBase> _query_base;
+};
+
+/******************************************************************************************/
 
 class WordQuery 
 : public QueryBase {
-   
-public:
-   
-private:
-   
+
+    friend class Query;
+
+    // 构造函数
+    WordQuery(const string& word)
+    : _query_word(word) {}
+
+    // 返回 根据 TextQuery 查找 _query_word 后的结果 QueryResult
+    QueryResult eval(const TextQuery& t) const {
+        return t.query(_query_word);
+    }
+
+    // 返回 要查询的 单词
+    string rep() const {
+        return _query_word;
+    }
+
+    // 要查找的单词
+    string _query_word;
 };
 
+/******************************************************************************************/
+
 class NotQuery 
-: public  QueryBase {
-   
-public:
-   
-private:
-   
+: public QueryBase {
+    
+    friend Query operator~(const Query&);
+    
+    // 构造函数
+    NotQuery(const Query& q)
+    : _query(q) {}
+
+    QueryResult eval(const TextQuery&) const;
+    // 返回要查询的字符串
+    string rep() const {
+        return "~(" + _query.rep() + ") ";
+    }
+
+    Query _query;
 };
+
+/******************************************************************************************/
 
 class BinaryQuery 
 : public QueryBase {
    
-public:
-   
-private:
-   
+protected:
+    // protected
+
+    BinaryQuery(const Query& lhs, const Query& rhs, string op) 
+    : _lhs(lhs)
+    , _rhs(rhs)
+    , _op(op) {}
+
+    // 此处只完成了 1 个虚函数, 剩余 1 个在 派生类中完成
+    // 返回 要查询的内容 
+    string rep() const {
+        return "(" + _lhs.rep() + " " + _op + " " + _rhs.rep() + ")";
+    }
+
+    Query _lhs, _rhs;
+    string _op;
 };
+
+/******************************************************************************************/
 
 class AndQuery 
 : public BinaryQuery {
    
-public:
-   
-private:
+   friend Query operator&(const Query&, const Query&);
+   AndQuery(const Query& left, const Query& right) 
+   : BinaryQuery(left, right, "&") {}
+
+   QueryResult eval(const TextQuery&) const;
    
 };
+
+/******************************************************************************************/
 
 class OrQuery 
 : public BinaryQuery {
    
-public:
-   
-private:
-   
+    friend Query operator|(const Query&, const Query&);
+
+    OrQuery(const Query& left, const Query& right) 
+    : BinaryQuery(left, right, "|") {}
+
+    QueryResult eval(const TextQuery&) const;
 };
-*/
 
 
 #endif

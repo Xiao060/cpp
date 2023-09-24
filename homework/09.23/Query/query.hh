@@ -6,6 +6,7 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -16,6 +17,7 @@ using std::map;
 using std::vector;
 using std::set;
 using std::ifstream;
+using std::ostream;
 // vector 长度的类型, 即 size_t
 using line_no = vector<string>::size_type;
 
@@ -34,6 +36,21 @@ private:
     map<string, shared_ptr<set<line_no>>> _wordNumbers;
 };
 
+
+class QueryResult {
+public:
+    QueryResult(string s, shared_ptr<set<line_no>> lineNoSet, shared_ptr<vector<string>> _line);
+
+    friend ostream& print(ostream&, const QueryResult&);
+   
+private:
+    // 要查询的单词
+    string sought;
+    // 智能指针, 指向 查询单词对应的
+    shared_ptr<set<line_no>> _lineNoSet;
+    // 智能指针, 指向 文件内容 
+    shared_ptr<vector<string>> _lines;
+};
 
 
 

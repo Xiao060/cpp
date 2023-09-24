@@ -11,10 +11,10 @@ TextQuery::TextQuery(ifstream& ifs)
 
     string line;
     string word;
-    int line_no = 0;
+    int line_num = 0;
     while (getline(ifs, line)) {
 
-        ++line_no;
+        ++line_num;
         _lines->push_back(line);
 
         istringstream iss(line);
@@ -46,20 +46,16 @@ TextQuery::TextQuery(ifstream& ifs)
             if (word.size() == 0) {
                 continue;
             }
-            
 
-
-
+            if (_wordNumbers.count(word)) {
+                _wordNumbers[word]->insert(line_num);
+            } else {
+                shared_ptr<set<line_no>> tmp(new set<line_no>);
+                tmp->insert(line_num);
+                _wordNumbers[word] = tmp;
+            }
         }
-
-
-
-
-
-
-
     }
-
 }
 
 

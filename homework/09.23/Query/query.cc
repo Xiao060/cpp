@@ -22,6 +22,7 @@ TextQuery::TextQuery(ifstream& ifs)
     string line;
     string word;
     int line_num = 0;
+
     while (getline(ifs, line)) {
 
         ++line_num;
@@ -33,24 +34,24 @@ TextQuery::TextQuery(ifstream& ifs)
             // 完成了单词 大写转小写
 
             // 去除 单词头部 的 数字/符号
-            while (word.size() && ispunct(word[0]) || isdigit(word[0])) {
+            while (word.size() && (ispunct(word[0]) || isdigit(word[0]))) {
                 // 截取 子串, 参数1: 开始位置; 参数2: 截取长度, 默认截取到末尾
                 word = word.substr(1);
             }
 
             // 去除 单词尾部 的 数字/符号
-            while (word.size() && ispunct(word.back()) || isdigit(word.back())) {
+            while (word.size() && (ispunct(word.back()) || isdigit(word.back()))) {
                 word = word.substr(0, word.size()-1);
             }
 
             // 大写 转换为 小写 (从前往后转)
-            for (int i = 0; isupper(word[i]) && i < word.size(); ++i) {
-                word[i] = toupper(word[i]);
+            for (int i = 0; i < word.size() && isupper(word[i]); ++i) {
+                word[i] = tolower(word[i]);
             }
 
             // 大写 转换为 小写 (从后往前转)
-            for (int i = word.size()-1; isupper(word[i]) && i > 0; --i) {
-                word[i] = toupper(word[i]);
+            for (int i = word.size()-1; i > 0 && isupper(word[i]); --i) {
+                word[i] = tolower(word[i]);
             }
 
             if (word.size() == 0) {
@@ -86,7 +87,7 @@ QueryResult TextQuery::query(const string& word) const {
 
 /*************************************************************************/
 
-QueryResult::QueryResult(string word,shared_ptr<vector<string>> lines, shared_ptr<set<line_no>> lineNoSet) 
+QueryResult::QueryResult(string word, shared_ptr<vector<string>> lines, shared_ptr<set<line_no>> lineNoSet) 
 : _word(word) 
 , _lines(lines)
 , _lineNoSet(lineNoSet) {}
@@ -96,7 +97,7 @@ ostream& print(ostream& os, const QueryResult& rhs) {
        << (rhs._lineNoSet->size() > 1 ? "time" : "times") << endl;
 
     for (auto no : *rhs._lineNoSet) {
-        os << "\t(line " << no << " ) " << (*rhs._lines)[no-1] << endl;
+        os << "    (line " << no << ") " << (*rhs._lines)[no-1] << endl;
     }
 
     return os;
@@ -104,8 +105,8 @@ ostream& print(ostream& os, const QueryResult& rhs) {
 
 /**********************************************************************/
 
-void runQueries(ifstream& infile) {
-    TextQuery tq(infile);
+void runQueries(ifstream& ifs) {
+    TextQuery tq(ifs);
 
     while (true) {
         cout << "enter word to look for, or q to quit: ";

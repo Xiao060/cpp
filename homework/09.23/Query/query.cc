@@ -1,10 +1,15 @@
 #include "query.hh"
 #include <cctype>
+#include <map>
 #include <memory>
+#include <set>
 #include <sstream>
+#include <string>
 #include <vector>
 
 using std::istringstream;
+using std::string;
+using std::endl;
 
 TextQuery::TextQuery(ifstream& ifs) 
 : _lines(new vector<string>) {
@@ -58,8 +63,55 @@ TextQuery::TextQuery(ifstream& ifs)
     }
 }
 
+// const 修饰 成员函数(函数体), 不能在函数体中修改数据成员
+// 故 函数体内没法使用 _wordNumbers[word]
+QueryResult TextQuery::query(const string& word) const {
 
+    // 查找不到 word 时返回的 QueryResult 指向该集合
+    static shared_ptr<set<line_no>> emptySet(new set<line_no>);
 
-QueryResult TextQuery::query(const string&) const {
-
+    // 类型为 map<string, shared_ptr<set<line_no>>>::const_iterator 
+    auto pair = _wordNumbers.find(word);
+    if (pair != _wordNumbers.end()) {
+        return QueryResult(word, _lines, pair->second);
+    } else {
+        return QueryResult(word, _lines, emptySet);
+    }
 }
+
+/*************************************************************************/
+
+QueryResult::QueryResult(string word,shared_ptr<vector<string>> lines, shared_ptr<set<line_no>> lineNoSet) 
+: _word(word) 
+, _lines(lines)
+, _lineNoSet(lineNoSet) {}
+
+ostream& print(ostream& os, const QueryResult& rhs) {
+    os << rhs._word << " occurs " << rhs._lineNoSet->size() << " "
+       << (rhs._lineNoSet->size() > 1 ? "time" : "times") << endl;
+
+    for (auto no : *rhs._lineNoSet) {
+        os << "\t(line " << no << " ) " << (*rhs._lines)[no-1] << endl;
+    }
+
+    return os;
+}
+
+/**********************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

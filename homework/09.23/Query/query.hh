@@ -39,17 +39,17 @@ private:
 
 class QueryResult {
 public:
-    QueryResult(string s, shared_ptr<set<line_no>> lineNoSet, shared_ptr<vector<string>> _line);
+    QueryResult(string s, shared_ptr<vector<string>> lines, shared_ptr<set<line_no>> lineNoSet);
 
     friend ostream& print(ostream&, const QueryResult&);
    
 private:
     // 要查询的单词
-    string sought;
-    // 智能指针, 指向 查询单词对应的
-    shared_ptr<set<line_no>> _lineNoSet;
+    string _word;
     // 智能指针, 指向 文件内容 
     shared_ptr<vector<string>> _lines;
+    // 智能指针, 指向 查询单词对应的
+    shared_ptr<set<line_no>> _lineNoSet;
 };
 
 

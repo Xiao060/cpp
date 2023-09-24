@@ -1,5 +1,7 @@
 #include "query.hh"
 #include <cctype>
+#include <fstream>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <set>
@@ -9,7 +11,10 @@
 
 using std::istringstream;
 using std::string;
+using std::cin;
+using std::cout;
 using std::endl;
+using std::ifstream;
 
 TextQuery::TextQuery(ifstream& ifs) 
 : _lines(new vector<string>) {
@@ -99,8 +104,22 @@ ostream& print(ostream& os, const QueryResult& rhs) {
 
 /**********************************************************************/
 
+void runQueries(ifstream& infile) {
+    TextQuery tq(infile);
 
+    while (true) {
+        cout << "enter word to look for, or q to quit: ";
 
+        string word;
+        if (!(cin >> word) || word == "q") {
+            break;
+        }
+
+        print(cout, tq.query(word)) << endl;
+    }
+}
+
+/*******************************************************************/
 
 
 

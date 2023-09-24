@@ -54,7 +54,7 @@ private:
 
 
 
-
+/*
 
 class QueryBase {
    
@@ -113,7 +113,7 @@ public:
 private:
    
 };
-
+*/
 
 
 #endif

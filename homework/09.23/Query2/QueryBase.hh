@@ -5,16 +5,19 @@
 // 抽象类
 #include "QueryResult.hh"
 #include "TextQuery.hh"
+
+
+
 class QueryBase {
-   
+
 public:
+    friend class Query;
    
 private:
-    virtual QueryResult eval(TextQuery&) {
-        
-    }
-   
+    virtual QueryResult query(TextQuery&) const = 0;
+    // virtual string rep() const = 0;
 };
+
 
 
 

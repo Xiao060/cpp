@@ -1,3 +1,4 @@
+#include "Query.hh"
 #include "TextQuery.hh"
 #include "QueryResult.hh"
 #include <fstream>
@@ -17,11 +18,16 @@ int main(int argc, char* argv[]) {
     ofstream ofs1("a.txt");
     ofstream ofs2("b.txt");
 
-    TextQuery text(ifs);
-    text.printToFile(ofs1);
 
-    QueryResult res = text.query("light");
+    TextQuery text(ifs);
+    // text.printToFile(ofs1);
+
+    Query q("light");
+    QueryResult res = q.query(text);
     res.printToFile(ofs2);
+
+
+    // QueryResult res = text.query("light");
 
     ofs2.close();
     ofs1.close();

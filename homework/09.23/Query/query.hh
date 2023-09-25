@@ -194,6 +194,7 @@ class AndQuery
 : public BinaryQuery {
    
    friend Query operator&(const Query&, const Query&);
+
    AndQuery(const Query& left, const Query& right) 
    : BinaryQuery(left, right, "&") {}
 

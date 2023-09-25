@@ -22,7 +22,7 @@ private:
     QueryResult query(TextQuery& tq) const;
 
 private:
-    string word;
+    string _word;
 };
 
 

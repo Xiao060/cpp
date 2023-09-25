@@ -42,6 +42,9 @@ void RssReader::parseRss() {
     XMLElement* elem;
     string text;
     regex e("<[\\s\\S]+?>");
+    // regex e("<.*?>");
+
+    // ofstream ofs("c.txt");
 
     while (item) {
         RssItem ritem;
@@ -65,6 +68,8 @@ void RssReader::parseRss() {
         text = elem->GetText();
         text = regex_replace(text, e, "");
         ritem.content = text;
+
+        // ofs << text << endl;
 
         _rss.push_back(ritem);
 

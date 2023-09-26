@@ -3,19 +3,20 @@
 
 #include "BinaryQuery.hh"
 #include "Query.hh"
+#include "QueryResult.hh"
+#include "TextQuery.hh"
 
 
 class AndQuery 
 : public BinaryQuery {
    
-public:
+public: 
+    friend class Query;
 
+private:
     AndQuery(const Query& lhs, const Query& rhs, const string& op);
    
-private:
-
-
-   
+    QueryResult query(TextQuery& tq) const;
 };
 
 

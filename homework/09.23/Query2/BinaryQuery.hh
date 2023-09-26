@@ -9,11 +9,10 @@ using std::shared_ptr;
 using std::string;
 
 class BinaryQuery {
-   
+
 public:
     friend class Query;
     
-
 protected:
     BinaryQuery(const Query& lhs, const Query& rhs, const string& op);
    

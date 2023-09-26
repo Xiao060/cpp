@@ -11,7 +11,7 @@ class BinaryQuery {
 public:
 
 private:
-    BinaryQuery();
+    BinaryQuery(const Query& lhs, const Query& rhs, const string& op);
    
 private:
     Query _lhs, _rhs;

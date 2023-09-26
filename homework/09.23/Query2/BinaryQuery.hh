@@ -16,7 +16,6 @@ public:
 protected:
     BinaryQuery(const Query& lhs, const Query& rhs, const string& op);
    
-private:
     Query _lhs, _rhs;
     string _op;
 };

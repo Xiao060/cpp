@@ -5,6 +5,7 @@
 #include "QueryBase.hh"
 #include "QueryResult.hh"
 #include "TextQuery.hh"
+#include <string>
 
 class WordQuery
 : public QueryBase {
@@ -19,7 +20,9 @@ private:
     // 构造函数设为 私有, 禁止直接调用
     WordQuery(const string& word);
 
+    // 从 QueryBase 继承过来的
     QueryResult query(TextQuery& tq) const;
+    string words() const;
 
 private:
     string _word;

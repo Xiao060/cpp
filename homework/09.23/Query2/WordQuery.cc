@@ -8,3 +8,7 @@ WordQuery::WordQuery(const string& word)
 QueryResult WordQuery::query(TextQuery& tq) const {
     return tq.query(_word);
 }
+    
+string WordQuery::words() const {
+    return _word;
+}

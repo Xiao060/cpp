@@ -15,7 +15,7 @@ public:
    
 private:
     virtual QueryResult query(TextQuery&) const = 0;
-    // virtual string rep() const = 0;
+    virtual string words() const = 0;
 };
 
 

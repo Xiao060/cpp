@@ -11,13 +11,15 @@ class Query {
    
 public:
 
+    // Query(const Query& q);
+
     Query(const string& word);
 
     QueryResult query(TextQuery& tq) const;
     
-   
+    
 private:
-    shared_ptr<QueryBase> _spQuery;
+    shared_ptr<QueryBase> _spQueryBase;
 };
 
 

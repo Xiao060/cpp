@@ -24,7 +24,9 @@ int main(int argc, char* argv[]) {
 
     Query q("light");
     QueryResult res = q.query(text);
-    res.printToFile(ofs2);
+    // res.printToFile(ofs2);
+
+    ofs2 << res << endl;
 
 
     // QueryResult res = text.query("light");

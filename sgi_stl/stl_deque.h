@@ -227,7 +227,7 @@ inline ptrdiff_t* distance_type(const _Deque_iterator<_Tp,_Ref,_Ptr>&) {
 //  the differences between SGI-style allocators and standard-conforming
 //  allocators.
 
-#ifdef __STL_USE_STD_ALLOCATORS
+// #ifdef __STL_USE_STD_ALLOCATORS
 
 // Base class for ordinary allocators.
 template <class _Tp, class _Alloc, bool __is_static>
@@ -240,7 +240,7 @@ public:
     : _M_node_allocator(__a), _M_map_allocator(__a),
       _M_map(0), _M_map_size(0)
   {}
-  
+
 protected:
   typedef typename _Alloc_traits<_Tp*, _Alloc>::allocator_type
           _Map_allocator_type;
@@ -323,7 +323,7 @@ protected:
   iterator _M_finish;
 };
 
-#else /* __STL_USE_STD_ALLOCATORS */
+// #else /* __STL_USE_STD_ALLOCATORS */
 
 template <class _Tp, class _Alloc>
 class _Deque_base {

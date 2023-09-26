@@ -1,5 +1,7 @@
 #include "Query.hh"
+#include "AndQuery.hh"
 #include "WordQuery.hh"
+#include <memory>
 
 // Query::Query(const Query& q) 
 // : _spQueryBase(q._spQueryBase) {}
@@ -16,4 +18,16 @@ Query::Query(const string& word)
 // 同上 两种情况
 QueryResult Query::query(TextQuery& tq) const {
     return _spQueryBase->query(tq);
+}
+
+Query Query::operator&(const Query& rhs) {
+    return AndQuery()    
+}
+
+Query Query::operator|(const Query& rhs) {
+
+}
+
+Query Query::operator~() {
+
 }

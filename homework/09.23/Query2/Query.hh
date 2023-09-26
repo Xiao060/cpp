@@ -16,6 +16,11 @@ public:
     Query(const string& word);
 
     QueryResult query(TextQuery& tq) const;
+
+    // 重载 与/或/非 运算符
+    Query operator&(const Query& rhs);
+    Query operator|(const Query& rhs);
+    Query operator~();
     
     
 private:

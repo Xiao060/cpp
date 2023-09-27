@@ -14,8 +14,8 @@ int main(int argc, char* argv[]) {
 
     Sub s3(p, 3);
 
-    p.setinfo(13, "XiaoHong", 'M');
 
+    p.setinfo(13, "XiaoHong", 'M');
 
 
     return 0;

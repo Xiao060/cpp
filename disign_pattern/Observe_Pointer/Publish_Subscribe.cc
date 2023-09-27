@@ -31,10 +31,20 @@ void Publish::detach(Subscribe* pSub) {
     }
 }
 
-void Publish::notifySubscribe() {
+// void Publish::setChanged() {
+//     _changed = true; 
+// }
+
+void Publish::notify() {
+    // if (!_changed) {
+    //     return ;
+    // }
+
     for (auto& elem : _pObservers) {
         elem->update();
     }
+
+    // _changed = false;
 }
 
 

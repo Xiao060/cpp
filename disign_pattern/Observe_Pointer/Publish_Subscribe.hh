@@ -1,3 +1,19 @@
+/* Publish
+
+数据成员: list 储存 Subscribe 对象指针
+成员函数: 
+         attach(); 
+         detach();
+         notify();
+*/
+
+/* Subscirbe
+
+数据成员: Publish 对象指针
+成员函数: 
+         uodate();
+*/
+
 #ifndef __PUBLISH_SUBSCRIBE_HPP__
 #define __PUBLISH_SUBSCRIBE_HPP__
 
@@ -22,12 +38,16 @@ public:
     friend class Subscribe;
 
 protected:
+    Publish() = default;
     void attach(Subscribe* pSub);
     void detach(Subscribe* pSub);
-    void notifySubscribe();
+
+    // void setChanged();
+    void notify();
     
 private:
     set<Subscribe*> _pObservers;
+    // bool _changed = false;
 };
 
 

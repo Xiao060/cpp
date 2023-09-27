@@ -11,5 +11,5 @@ void Pub::setinfo(int no, string name, char gender) {
     _name = name;
     _gender = gender;
 
-    notifySubscribe();
+    notify();
 }

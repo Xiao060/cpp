@@ -31,6 +31,7 @@
 #ifndef __SGI_STL_INTERNAL_VECTOR_H
 #define __SGI_STL_INTERNAL_VECTOR_H
 
+#include "stl_config.h"
 #include <concept_checks.h>
 
 __STL_BEGIN_NAMESPACE 
@@ -46,9 +47,10 @@ __STL_BEGIN_NAMESPACE
 // the differences between SGI-style allocators and standard-conforming
 // allocators.
 
-#ifdef __STL_USE_STD_ALLOCATORS
+//#ifdef __STL_USE_STD_ALLOCATORS
 
 // Base class for ordinary allocators.
+
 template <class _Tp, class _Allocator, bool _IsStatic>
 class _Vector_alloc_base {
 public:
@@ -117,7 +119,7 @@ struct _Vector_base
   ~_Vector_base() { _M_deallocate(_M_start, _M_end_of_storage - _M_start); }
 };    
 
-#else /* __STL_USE_STD_ALLOCATORS */
+//#else /* __STL_USE_STD_ALLOCATORS */
 
 template <class _Tp, class _Alloc> 
 class _Vector_base {
@@ -185,13 +187,13 @@ public:
 #endif /* __STL_CLASS_PARTIAL_SPECIALIZATION */
 
 protected:
-#ifdef __STL_HAS_NAMESPACES
+//#ifdef __STL_HAS_NAMESPACES
   using _Base::_M_allocate;
   using _Base::_M_deallocate;
   using _Base::_M_start;
   using _Base::_M_finish;
   using _Base::_M_end_of_storage;
-#endif /* __STL_HAS_NAMESPACES */
+//#endif /* __STL_HAS_NAMESPACES */
 
 protected:
   void _M_insert_aux(iterator __position, const _Tp& __x);
@@ -252,7 +254,7 @@ public:
     : _Base(__x.size(), __x.get_allocator())
     { _M_finish = uninitialized_copy(__x.begin(), __x.end(), _M_start); }
 
-#ifdef __STL_MEMBER_TEMPLATES
+//#ifdef __STL_MEMBER_TEMPLATES
   // Check whether it's an integral type.  If so, it's not an iterator.
   template <class _InputIterator>
   vector(_InputIterator __first, _InputIterator __last,
@@ -304,7 +306,7 @@ public:
   void assign(size_type __n, const _Tp& __val) { _M_fill_assign(__n, __val); }
   void _M_fill_assign(size_type __n, const _Tp& __val);
 
-#ifdef __STL_MEMBER_TEMPLATES
+//#ifdef __STL_MEMBER_TEMPLATES
   
   template <class _InputIterator>
   void assign(_InputIterator __first, _InputIterator __last) {
@@ -377,7 +379,7 @@ public:
       _M_insert_aux(__position);
     return begin() + __n;
   }
-#ifdef __STL_MEMBER_TEMPLATES
+//#ifdef __STL_MEMBER_TEMPLATES
   // Check whether it's an integral type.  If so, it's not an iterator.
   template <class _InputIterator>
   void insert(iterator __pos, _InputIterator __first, _InputIterator __last) {
@@ -435,7 +437,7 @@ public:
 
 protected:
 
-#ifdef __STL_MEMBER_TEMPLATES
+//#ifdef __STL_MEMBER_TEMPLATES
   template <class _ForwardIterator>
   iterator _M_allocate_and_copy(size_type __n, _ForwardIterator __first, 
                                                _ForwardIterator __last)
@@ -461,7 +463,7 @@ protected:
 #endif /* __STL_MEMBER_TEMPLATES */
 
 
-#ifdef __STL_MEMBER_TEMPLATES
+//#ifdef __STL_MEMBER_TEMPLATES
   template <class _InputIterator>
   void _M_range_initialize(_InputIterator __first,  
                            _InputIterator __last, input_iterator_tag)
@@ -511,7 +513,7 @@ operator<(const vector<_Tp, _Alloc>& __x, const vector<_Tp, _Alloc>& __y)
                                  __y.begin(), __y.end());
 }
 
-#ifdef __STL_FUNCTION_TMPL_PARTIAL_ORDER
+//#ifdef __STL_FUNCTION_TMPL_PARTIAL_ORDER
 
 template <class _Tp, class _Alloc>
 inline void swap(vector<_Tp, _Alloc>& __x, vector<_Tp, _Alloc>& __y)
@@ -586,7 +588,7 @@ void vector<_Tp, _Alloc>::_M_fill_assign(size_t __n, const value_type& __val)
     erase(fill_n(begin(), __n, __val), end());
 }
 
-#ifdef __STL_MEMBER_TEMPLATES
+//#ifdef __STL_MEMBER_TEMPLATES
 
 template <class _Tp, class _Alloc> template <class _InputIter>
 void vector<_Tp, _Alloc>::_M_assign_aux(_InputIter __first, _InputIter __last,
@@ -737,7 +739,7 @@ void vector<_Tp, _Alloc>::_M_fill_insert(iterator __position, size_type __n,
   }
 }
 
-#ifdef __STL_MEMBER_TEMPLATES
+//#ifdef __STL_MEMBER_TEMPLATES
 
 template <class _Tp, class _Alloc> template <class _InputIterator>
 void 

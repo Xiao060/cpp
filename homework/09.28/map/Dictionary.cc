@@ -1,5 +1,4 @@
 #include "Dictionary.hh"
-#include <bits/types/cookie_io_functions_t.h>
 #include <cctype>
 #include <fstream>
 

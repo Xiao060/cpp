@@ -10,11 +10,33 @@
 
         1. bitwise / physical constness (位/物理 常量)
 
+            编译器使用的方式
+
         2. logical constness (逻辑常量)
+
+        3. 避免 非 const 成员函数 与 const 成员函数 的代码重复, 可以使用 非 const 函数 调用 const 函数, 但是需要进行两次类型转换
+
+            ```c++
+            class Test {
+            public:
+                const char& operator[](size_t index) const {
+                    return ...;
+                }
+
+                char& operator[](size_t index) {
+                    return const_cast<char&> (static_cast<const Test&>(*this)[index])
+                }
+               
+            private:
+                char* _s;
+            };            
+            ```
 
     2. [mutable](https://poe.com/s/yhMiwew5NK6WIUq3dBjW) 修饰类的成员变量, 使其在 const 成员函数中也可以修改
 
 4. 确定对象被使用前已先被初始化（构造时赋值（copy 构造函数）比 default 构造后赋值（copy assignment）效率高）
+
+    1. 类的构造函数 注意区分 **初始化(列表)** 与 **赋值**, 初始化列表性能 优于 赋值
 
 5. 了解 C++ 默默编写并调用哪些函数（编译器暗自为 class 创建 default 构造函数、copy 构造函数、copy assignment 操作符、析构函数）
 

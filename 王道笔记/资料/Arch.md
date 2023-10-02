@@ -2,6 +2,8 @@
 
 ## net-tools
 
-> ifconfig: ip addr
->
-> netstat: ss
+```bash
+ifconfig: ip addr
+
+netstat: ss
+```

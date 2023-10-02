@@ -1,8 +1,6 @@
-time.h
+# time.h (**日期和时间工具**)
 
-**日期和时间工具**
-
-### 类型
+## 类型
 
 | 类型  | 说明  | 说明  | 例子  |
 | --- | --- | --- | --- |
@@ -11,7 +9,7 @@ time.h
 | [clock_t](https://zh.cppreference.com/w/c/chrono/clock_t "c/chrono/clock t") | 从时点开始的处理器时间类型<br>(typedef) |     |     |
 | [timespec](https://zh.cppreference.com/w/c/chrono/timespec "c/chrono/timespec") (C11) | 单位为秒和纳秒的时间<br>(结构体) |     |     |
 
-### [](#)函数
+## 函数
 
 | 函数  | 作用  | 使用方式 |
 | --- | --- | --- |
@@ -31,7 +29,7 @@ time.h
 | `<wchar.h>` |     |     |
 | [wcsftime](https://zh.cppreference.com/w/c/chrono/wcsftime "c/chrono/wcsftime") (C95) | 将 `struct tm` 对象转换成自定义宽字符文本表示<br>(函数) |     |
 
-### [](#)常量
+## 常量
 
 |     |     |
 | --- | --- |

@@ -88,6 +88,8 @@ void Vector<T>::reallocate() {
     auto new_start = _alloc.allocate(old_size);
     auto new_finish = new_start;
     new_finish = copy(_start, _finish, new_start);
+    
+    // typedef __type_traits<T>::has_trivial_destructor trivial destructor;
 
     _alloc.destroy(_start);
     _alloc.deallocate(_start, capacity());

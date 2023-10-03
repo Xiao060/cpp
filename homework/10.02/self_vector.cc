@@ -63,9 +63,11 @@ void Vector<T>::push_back(const T& rhs) {
 
 template<typename T>
 void Vector<T>::pop_back() {
-    // TODO: 判断空
-    --_finish;
-    _alloc.destory(_finish);
+    // 判断非空
+    if (size() > 0) {
+        --_finish;
+        _alloc.destory(_finish);
+    }
 }
 
 template<typename T>
@@ -82,20 +84,28 @@ int Vector<T>::capacity() {
 template<typename T>
 void Vector<T>::reallocate() {
 
+    // 1.申请空间
     size_t old_size = size();
     size_t new_size = old_size == 0 ? 1 : 2 * old_size;
+    auto new_start = _alloc.allocate(new_size);
 
-    auto new_start = _alloc.allocate(old_size);
-    auto new_finish = new_start;
-    new_finish = copy(_start, _finish, new_start);
+    if (_start) {
+        // 2.将老的空间上的元素拷贝到新的空间来
+        auto new_finish = copy(_start, _finish, new_start);
+
+        // 3.将老的空间上的元素循环销毁并且将空间回收
+        // 此处 从后往前销毁, 目的是 为了方便后续 空间回收
+        while (_start != _finish) {
+            --_finish;
+            _alloc.destroy(_finish);
+        }
+
+        _alloc.deallocate(_start, capacity());
+    }
     
-    // typedef __type_traits<T>::has_trivial_destructor trivial destructor;
-
-    _alloc.destroy(_start);
-    _alloc.deallocate(_start, capacity());
-
+    // 4.最后将三个指针与新的空间之间产生关系
     _start = new_start;
-    _finish = new_finish;
+    _finish = _start + new_size;
     _end_of_storage = new_start + new_size;
 }
 

@@ -10,7 +10,9 @@ using std::endl;
 using std::copy;
 using std::allocator;
 using std::ostream_iterator;
-using std::copy;
+// using std::copy;
+// 未初始化的 copy
+using std::uninitialized_copy;
 
 template<typename T>
 class Vector {
@@ -45,8 +47,14 @@ Vector<T>::Vector()
 
 template<typename T>
 Vector<T>::~Vector() {
-    if (_start != nullptr) {
-        _alloc.destroy(_start);
+
+    if (_start) {
+        
+        while (_start != _finish) {
+            --_finish;
+            _alloc.destroy(_finish);
+        }
+
         _alloc.deallocate(_start, capacity());
     }
 }
@@ -91,7 +99,9 @@ void Vector<T>::reallocate() {
 
     if (_start) {
         // 2.将老的空间上的元素拷贝到新的空间来
-        auto new_finish = copy(_start, _finish, new_start);
+        // copy(_start, _finish, new_start);
+        // 未初始化的 copy
+        uninitialized_copy(_start, _finish, new_start);
 
         // 3.将老的空间上的元素循环销毁并且将空间回收
         // 此处 从后往前销毁, 目的是 为了方便后续 空间回收
@@ -100,12 +110,12 @@ void Vector<T>::reallocate() {
             _alloc.destroy(_finish);
         }
 
-        _alloc.deallocate(_start, capacity());
+        _alloc.deallocate(_start, old_capacity);
     }
     
     // 4.最后将三个指针与新的空间之间产生关系
     _start = new_start;
-    _finish = _start + new_capacity;
+    _finish = _start + old_capacity;
     _end_of_storage = new_start + new_capacity;
 }
 

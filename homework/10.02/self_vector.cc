@@ -85,9 +85,9 @@ template<typename T>
 void Vector<T>::reallocate() {
 
     // 1.申请空间
-    size_t old_size = size();
-    size_t new_size = old_size == 0 ? 1 : 2 * old_size;
-    auto new_start = _alloc.allocate(new_size);
+    size_t old_capacity = capacity();
+    size_t new_capacity = old_capacity == 0 ? 1 : 2 * old_capacity;
+    auto new_start = _alloc.allocate(new_capacity);
 
     if (_start) {
         // 2.将老的空间上的元素拷贝到新的空间来
@@ -105,8 +105,8 @@ void Vector<T>::reallocate() {
     
     // 4.最后将三个指针与新的空间之间产生关系
     _start = new_start;
-    _finish = _start + new_size;
-    _end_of_storage = new_start + new_size;
+    _finish = _start + new_capacity;
+    _end_of_storage = new_start + new_capacity;
 }
 
 

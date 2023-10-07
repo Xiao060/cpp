@@ -25,10 +25,14 @@ void MutexLock::unlock() {
 }
 
 void MutexLock::trylock() {
-    pthread_mutex_trylock(&_mutex);
+    int ret = pthread_mutex_trylock(&_mutex);
+
+    if (ret) {
+        perror("pthread_mutex_trylock");
+    }
 }
 
 pthread_mutex_t* MutexLock::getMutexLockPtr() {
-
+    return &_mutex;
 }
 

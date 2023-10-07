@@ -23,6 +23,7 @@ void TaskQueue::push(const int& value) {
 }
 
 int TaskQueue::pop() {
+
     if (empty()) {
         perror("TaskQueue is empty");
         return -1;

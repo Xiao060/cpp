@@ -283,9 +283,13 @@
 
     2. 被其他类继承, 需要 将 析构函数 设为 `virtual`
 
-转换、一般化等等
+6. 隐式转换
 
-### 20. 宁以 pass-by-reference-to-const 替换 pass-by-value  (前者通常更高效、避免切割问题 (slicing problem) , 但不适用于内置类型、STL迭代器、函数对象)
+7. 一般化
+
+### 20. 宁以 pass-by-reference-to-const 替换 pass-by-value
+
+前者通常更高效、避免切割问题 (slicing problem) , 但不适用于内置类型、STL迭代器、函数对象)
 
 ### 21. 必须返回对象时, 别妄想返回其 reference (绝不返回 pointer 或 reference 指向一个 local stack 对象, 或返回 reference 指向一个 heap-allocated 对象, 或返回 pointer 或 reference 指向一个 local static 对象而有可能同时需要多个这样的对象。)
 

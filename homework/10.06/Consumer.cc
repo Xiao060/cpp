@@ -20,6 +20,6 @@ void Consumer::run() {
 
         cout << "receive: " << rec << endl;
 
-        sleep(5);
+        sleep(3);
     }
 }

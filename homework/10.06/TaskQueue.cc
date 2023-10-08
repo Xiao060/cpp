@@ -1,7 +1,11 @@
 #include "TaskQueue.hh"
 #include <cstdio>
+#include <iostream>
 #include <pthread.h>
 #include <queue>
+
+using std::cout;
+using std::endl;
     
 
 TaskQueue::TaskQueue(size_t queSize) 
@@ -25,6 +29,7 @@ void TaskQueue::push(const int& value) {
     _que.push(value);
 
     _mutex.unlock();
+    _notEmpty.notifyAll();
 }
 
 int TaskQueue::pop() {
@@ -38,6 +43,7 @@ int TaskQueue::pop() {
     _que.pop();
 
     _mutex.unlock();
+    _notFull.notifyAll();
 
     return ret;
 }

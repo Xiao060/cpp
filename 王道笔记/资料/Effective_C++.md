@@ -1,5 +1,7 @@
 # Effective C++
 
+## 让自己习惯 C++
+
 ### 01. 视 C++ 为一个语言联邦 (C、Object-Oriented C++、Template C++、STL)
 
 ### 02. 宁可以编译器替换预处理器 (尽量以 `const`、`enum`、`inline` 替换 `#define`)
@@ -45,6 +47,8 @@
 4. 基类 先于 派生类 被初始化
 
 5. 类内的数据成员以 **声明次序** 初始化
+
+## 构造/析构/赋值运算
 
 ### 05. 了解 C++ 默默编写并调用哪些函数
 
@@ -138,6 +142,8 @@
 
 2. 复制运算符函数同理, 建议 手动调用 基类的 赋值运算符函数
 
+## 资源管理
+
 ### 13. 以对象管理资源 (RAII)
 
 1. 获得资源后 立刻放入 管理对象 (`auto_ptr / shared_ptr`)
@@ -221,9 +227,63 @@
 
 2. 建议 将 `shared_ptr(xxxx)` 写成一条独立语句
 
-### 18. 让接口容易被正确使用, 不易被误用 (促进正常使用的办法：接口的一致性、内置类型的行为兼容；阻止误用的办法：建立新类型, 限制类型上的操作, 约束对象值、消除客户的资源管理责任)
+## 设计与声明
 
-### 19. 设计 class 犹如设计 type, 需要考虑对象创建、销毁、初始化、赋值、值传递、合法值、继承关系、转换、一般化等等
+### 18. 让接口容易被正确使用, 不易被误用
+
+1. 正确 使用
+
+    1. 保持接口的一致性
+
+        例 `STL` 都具有 `size()` 等接口
+
+2. 阻止 误用
+
+    1. 防止 使用接口时 输入参数 出现乱序的行为, 可以将参数设为不同的 自定义类型, 即 <mark>外覆类型</mark> (wrapper types)
+
+        例: `func(int year, int month, int day);` 改为 `func(Year(2023), Month(12), Day(15));`
+
+    2. 防止 使用接口时 输入参数 出现 无效值行为, 可以 使用 <mark>类内静态函数</mark> **预先定义有效的值**
+
+        ```c++
+        class Month {
+        public:
+            static Month Jan() { return Month(1); }
+            ...;
+
+        private:
+            explicit Month(int m);
+        };
+
+        // 使用接口
+        func(Year(2023), Month::Jan(), Day(15));
+        ```
+
+    3. 当函数 返回 堆上数据的指针时, 为避免资源泄漏, 建议返回 <mark>智能指针</mark>
+
+        例: `xxx* func();` 改为 `shared_ptr<xxx> func();`
+
+    4. 通过 `const` 限制 返回值类型, 防止 对 返回值 赋值
+
+        例: `const xxx operator*();` 防止 对 `a * b` 进行赋值
+
+### 19. 设计 class 犹如设计 type
+
+1. 创建、销毁 (new / new [] / delete / delete [])
+
+2. 初始化、赋值 (拷贝构造 / 赋值运算符函数)
+
+3. 值传递
+
+4. 合法值 (错误检查)
+
+5. 继承关系
+
+    1. 继承其他类
+
+    2. 被其他类继承, 需要 将 析构函数 设为 `virtual`
+
+转换、一般化等等
 
 ### 20. 宁以 pass-by-reference-to-const 替换 pass-by-value  (前者通常更高效、避免切割问题 (slicing problem) , 但不适用于内置类型、STL迭代器、函数对象)
 
@@ -237,6 +297,8 @@
 
 ### 25. 考虑写一个不抛异常的 swap 函数
 
+## 实现
+
 ### 26. 尽可能延后变量定义式的出现时间 (可增加程序清晰度并改善程序效率)
 
 ### 27. 尽量少做转型动作 (旧式：`(T)expression`、`T(expression)`；新式：`const_cast<T>(expression)`、`dynamic_cast<T>(expression)`、`reinterpret_cast<T>(expression)`、`static_cast<T>(expression)`、；尽量避免转型、注重效率避免 dynamic_casts、尽量设计成无需转型、可把转型封装成函数、宁可用新式转型)
@@ -248,6 +310,8 @@
 ### 30. 透彻了解 inlining 的里里外外 (inlining 在大多数 C++ 程序中是编译期的行为；inline 函数是否真正 inline, 取决于编译器；大部分编译器拒绝太过复杂 (如带有循环或递归) 的函数 inlining, 而所有对 virtual 函数的调用 (除非是最平淡无奇的) 也都会使 inlining 落空；inline 造成的代码膨胀可能带来效率损失；inline 函数无法随着程序库的升级而升级)
 
 ### 31. 将文件间的编译依存关系降至最低 (如果使用 object references 或 object pointers 可以完成任务, 就不要使用 objects；如果能够, 尽量以 class 声明式替换 class 定义式；为声明式和定义式提供不同的头文件)
+
+## 继承 与 面向对象设计
 
 ### 32. 确定你的 public 继承塑模出 is-a (是一种) 关系 (适用于 base classes 身上的每一件事情一定适用于 derived classes 身上, 因为每一个 derived class 对象也都是一个 base class 对象)
 
@@ -267,6 +331,8 @@
 
 ### 40. 明智而审慎地使用多重继承 (多继承比单一继承复杂, 可能导致新的歧义性, 以及对 virtual 继承的需要, 但确有正当用途, 如 “public 继承某个 interface class” 和 “private 继承某个协助实现的 class”；virtual 继承可解决多继承下菱形继承的二义性问题, 但会增加大小、速度、初始化及赋值的复杂度等等成本)
 
+## 模板 与 泛型编程
+
 ### 41. 了解隐式接口和编译期多态 (class 和 templates 都支持接口 (interfaces) 和多态 (polymorphism) ；class 的接口是以签名为中心的显式的 (explicit) , 多态则是通过 virtual 函数发生于运行期；template 的接口是奠基于有效表达式的隐式的 (implicit) , 多态则是通过 template 具现化和函数重载解析 (function overloading resolution) 发生于编译期)
 
 ### 42. 了解 typename 的双重意义 (声明 template 类型参数是, 前缀关键字 class 和 typename 的意义完全相同；请使用关键字 typename 标识嵌套从属类型名称, 但不得在基类列 (base class lists) 或成员初值列 (member initialization list) 内以它作为 base class 修饰符)
@@ -283,6 +349,8 @@
 
 ### 48. 认识 template 元编程 (模板元编程 (TMP, template metaprogramming) 可将工作由运行期移往编译期, 因此得以实现早期错误侦测和更高的执行效率；TMP 可被用来生成 “给予政策选择组合” (based on combinations of policy choices) 的客户定制代码, 也可用来避免生成对某些特殊类型并不适合的代码)
 
+## 定制 new / delete
+
 ### 49. 了解 new-handler 的行为 (set\_new\_handler 允许客户指定一个在内存分配无法获得满足时被调用的函数；nothrow new 是一个颇具局限的工具, 因为它只适用于内存分配 (operator new) , 后继的构造函数调用还是可能抛出异常)
 
 ### 50. 了解 new 和 delete 的合理替换时机 (为了检测运用错误、收集动态分配内存之使用统计信息、增加分配和归还速度、降低缺省内存管理器带来的空间额外开销、弥补缺省分配器中的非最佳齐位、将相关对象成簇集中、获得非传统的行为)
@@ -290,6 +358,8 @@
 ### 51. 编写 new 和 delete 时需固守常规 (operator new 应该内涵一个无穷循环, 并在其中尝试分配内存, 如果它无法满足内存需求, 就应该调用 new-handler, 它也应该有能力处理 0 bytes 申请, class 专属版本则还应该处理 “比正确大小更大的 (错误) 申请”；operator delete 应该在收到 null 指针时不做任何事, class 专属版本则还应该处理 “比正确大小更大的 (错误) 申请”)
 
 ### 52. 写了 placement new 也要写 placement delete (当你写一个 placement operator new, 请确定也写出了对应的 placement operator delete, 否则可能会发生隐微而时断时续的内存泄漏；当你声明 placement new 和 placement delete, 请确定不要无意识 (非故意) 地遮掩了它们地正常版本)
+
+## 杂项讨论
 
 ### 53. 不要轻忽编译器的警告
 

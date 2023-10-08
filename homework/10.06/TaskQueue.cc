@@ -1,5 +1,6 @@
 #include "TaskQueue.hh"
 #include <cstdio>
+#include <pthread.h>
 #include <queue>
     
 
@@ -14,23 +15,29 @@ TaskQueue::~TaskQueue() {
 
 
 void TaskQueue::push(const int& value) {
-    if (full()) {
-        perror("TaskQueue is full");
-        return ;
+
+    _mutex.lock();
+
+    while (full()) {
+        _notFull.wait();
     }
 
     _que.push(value);
+
+    _mutex.unlock();
 }
 
 int TaskQueue::pop() {
+    _mutex.lock();
 
-    if (empty()) {
-        perror("TaskQueue is empty");
-        return -1;
+    while (empty()) {
+        _notEmpty.wait();
     }
 
     int ret = _que.front();
     _que.pop();
+
+    _mutex.unlock();
 
     return ret;
 }

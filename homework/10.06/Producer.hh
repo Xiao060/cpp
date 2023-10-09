@@ -1,9 +1,11 @@
 #ifndef __PRODUCER_HPP__
 #define __PRODUCER_HPP__
 
-#include "TaskQueue.hh"
 #include "Thread.hh"
 
+// #include "TaskQueue.hh"
+// 此处使用的是 引用, 使用 前向声明
+class TaskQueue;
 
 class Producer 
 : public Thread {

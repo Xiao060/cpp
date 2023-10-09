@@ -312,9 +312,25 @@
     x = a * b * c;
     ```
 
-3. 绝不返回 pointer 或 reference 指向一个 local stack 对象, 或返回 reference 指向一个 heap-allocated 对象, 或返回 pointer 或 reference 指向一个 local static 对象而有可能同时需要多个这样的对象。)
+3. 指针/引用 作为返回值时, 如果需要多次使用 返回值, 则不要将其指向 static 变量
 
-### 22. 将成员变量声明为 private (为了封装、一致性、对其读写精确控制等)
+    ```c++
+    xxx& operator*(const xxx lhs, const xxx rhs) {
+        static m = ...;
+        return m;
+    }
+
+    // 则 下列语句 永远为 true
+    // 判断的 两个引用(指针) 指向的是 一个 static 变量
+    if (a * b == c * d) { ...; }
+    ```
+
+### 22. 将成员变量声明为 private
+
+1. 优点: 封装、一致性、对其读写精确控制等
+
+    例: 若成员 为 `public`, 则 该变量名 被 修改/删除, 则依赖它的 客户代码被破坏  
+        若成员 为 `protect`, 则 该变量名 被 修改/删除, 则依赖它的 派生类代码被破坏
 
 ### 23. 宁以 non-member、non-friend 替换 member 函数 (可增加封装性、包裹弹性 (packaging flexibility) 、机能扩充性)
 

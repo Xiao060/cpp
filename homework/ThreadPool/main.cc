@@ -14,14 +14,12 @@ int main() {
 
     unique_ptr<Task> ptask(new MyTask());
 
-
     pool.start();
 
     int cnt = 10;
     while (cnt--) {
         pool.addTask(ptask.get());
     }
-
 
     pool.stop();
 

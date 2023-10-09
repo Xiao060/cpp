@@ -1,10 +1,11 @@
 #include "TaskQueue.hh"
+#include "MutexLock.hh"
 #include "Task.hh"
+#include "MutexLockGuard.hh"
 #include <cstdio>
 #include <iostream>
 #include <pthread.h>
 #include <queue>
-
 
 TaskQueue::TaskQueue(size_t queSize) 
 : _queSize(queSize) 
@@ -19,37 +20,37 @@ TaskQueue::~TaskQueue() {
 }
 
 
-void TaskQueue::push(ElemType value) {
+void TaskQueue::push(ElemType ptask) {
 
-    _mutex.lock();
+    // 利用 栈对象 的 生命周期 管理资源
+    // 使用 RAII 完成 上锁 / 解锁
+    MutexLockGuard autoLock(_mutex);
 
     while (full()) {
         _notFull.wait();
     }
 
-    _que.push(value);
-
-    _mutex.unlock();
+    _que.push(ptask);
     _notEmpty.notifyAll();
 }
 
 ElemType TaskQueue::pop() {
-    _mutex.lock();
+
+    // 利用 栈对象 的 生命周期 管理资源
+    // 使用 RAII 完成 上锁 / 解锁
+    MutexLockGuard autoLock(_mutex);
 
     while (empty() && _flag) {
         _notEmpty.wait();
     }
 
-    ElemType ret;
+    ElemType ret = nullptr;
     if (_flag) {
         ret = _que.front();
         _que.pop();
-    } else {
-        ret = nullptr;
+        _notFull.notifyAll();
     }
 
-    _mutex.unlock();
-    _notFull.notifyAll();
     return ret;
 }
 
@@ -58,10 +59,10 @@ void TaskQueue::wakeup() {
     _notEmpty.notifyAll();
 }
 
-bool TaskQueue::empty() {
+bool TaskQueue::empty() const {
     return _que.size() == 0;
 }
 
-bool TaskQueue::full() {
+bool TaskQueue::full() const {
     return _que.size() == _queSize;
 }

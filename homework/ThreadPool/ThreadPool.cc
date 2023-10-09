@@ -38,7 +38,7 @@ void ThreadPool::start() {
 
 void ThreadPool::stop() {
 
-    while (!_isExit) {
+    while (!_taskQue.empty()) {
         sleep(1);
     }
 
@@ -69,7 +69,7 @@ void ThreadPool::doTask() {
         if (ptask) {
             ptask->process();
         } else {
-            cout << "ptask == nullptr" << endl;
+            cout << "ptask == nullptr\n";
         }
     }
 }

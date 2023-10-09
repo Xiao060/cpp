@@ -19,9 +19,9 @@ public:
     ElemType pop();
 
     void wakeup();
-    
-private:
     bool empty();
+
+private:
     bool full();
 
     size_t _queSize;   

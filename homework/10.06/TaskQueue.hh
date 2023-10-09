@@ -18,8 +18,8 @@ public:
     int pop();
     
 private:
-    bool empty();
-    bool full();
+    bool empty() const;
+    bool full() const;
 
     size_t _queSize;   
     queue<int> _que;

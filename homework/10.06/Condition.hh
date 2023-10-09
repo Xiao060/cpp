@@ -1,6 +1,7 @@
 #ifndef __CONDITION_HPP__
 #define __CONDITION_HPP__
 
+#include "NonCopyable.hh"
 #include <pthread.h>
 
 // 1. 直接引入 MutexLock.hh 头文件
@@ -13,8 +14,9 @@
 class MutexLock;
 
 
-
-class Condition {
+// 默认继承方式 为 私有继承
+class Condition 
+: NonCopyable {
 
 public:
     Condition(MutexLock& mutex);

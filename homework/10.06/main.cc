@@ -2,17 +2,20 @@
 #include "Producer.hh"
 #include "TaskQueue.hh"
 #include "Thread.hh"
+#include <algorithm>
 #include <iostream>
+#include <memory>
 #include <pthread.h>
 
+using std::unique_ptr;
 
 int main(int argc, char* argv[]) {
 
     TaskQueue tq(10);
 
-    Thread* pro1 = new Producer(tq);
-    Thread* pro2 = new Producer(tq);
-    Thread* con1 = new Consumer(tq);
+    unique_ptr<Thread> pro1(new Producer(tq));
+    unique_ptr<Thread> pro2(new Producer(tq));
+    unique_ptr<Thread> con1(new Consumer(tq));
 
     pro1->start();
     pro2->start();

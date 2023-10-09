@@ -7,6 +7,8 @@
 
 TaskQueue::TaskQueue(size_t queSize) 
 : _queSize(queSize) 
+, _que()
+, _mutex()
 , _notEmpty(_mutex)
 , _notFull(_mutex) { }
 
@@ -46,17 +48,9 @@ int TaskQueue::pop() {
 }
 
 bool TaskQueue::empty() {
-    if (_que.size() == 0) {
-        return true;
-    }
-
-    return false;
+    return _que.size() == 0;
 }
 
 bool TaskQueue::full() {
-    if (_que.size() == _queSize) {
-        return true;
-    }
-
-    return false;
+    return _que.size() == _queSize;
 }

@@ -1,6 +1,7 @@
 #include "Condition.hh"
 #include <cstdio>
 #include <pthread.h>
+#include "MutexLock.hh"
 
 Condition::Condition(MutexLock& mutex) 
 : _mutex(mutex) {
@@ -8,11 +9,17 @@ Condition::Condition(MutexLock& mutex)
 
     if (ret) {
         perror("pthread_cond_init");
+        return ;
     }
 }
 
 Condition::~Condition() {
-    pthread_cond_destroy(&_cond);
+    int ret = pthread_cond_destroy(&_cond);
+
+    if (ret) {
+        perror("pthread_cond_destroy");
+        return ;
+    }
 }
 
 
@@ -21,6 +28,7 @@ void Condition::wait() {
 
     if (ret) {
         perror("pthread_cond_wait");
+        return ;
     }
 }
 
@@ -29,6 +37,7 @@ void Condition::notify() {
 
     if (ret) {
         perror("pthread_cond_signal");
+        return ;
     }
 }
 
@@ -37,5 +46,6 @@ void Condition::notifyAll() {
 
     if (ret) {
         perror("pthread_cond_broadcast");
+        return ;
     }
 }

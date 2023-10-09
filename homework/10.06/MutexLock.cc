@@ -9,19 +9,35 @@ MutexLock::MutexLock() {
 
     if (ret) {
         perror("pthread_mutex_init");
+        return ;
     }
 }
 
 MutexLock::~MutexLock() {
-    pthread_mutex_destroy(&_mutex);
+    int ret = pthread_mutex_destroy(&_mutex);
+
+    if (ret) {
+        perror("pthread_mutex_destroy");
+        return ;
+    }
 }
 
 void MutexLock::lock() {
-    pthread_mutex_lock(&_mutex);
+    int ret = pthread_mutex_lock(&_mutex);
+
+    if (ret) {
+        perror("pthread_mutex_lock");
+        return ;
+    }
 }
 
 void MutexLock::unlock() {
-    pthread_mutex_unlock(&_mutex);
+    int ret = pthread_mutex_unlock(&_mutex);
+
+    if (ret) {
+        perror("pthread_mutex_unlock");
+        return ;
+    }
 }
 
 void MutexLock::trylock() {
@@ -29,6 +45,7 @@ void MutexLock::trylock() {
 
     if (ret) {
         perror("pthread_mutex_trylock");
+        return ;
     }
 }
 

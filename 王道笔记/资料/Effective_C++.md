@@ -289,9 +289,30 @@
 
 ### 20. 宁以 pass-by-reference-to-const 替换 pass-by-value
 
-前者通常更高效、避免切割问题 (slicing problem) , 但不适用于内置类型、STL迭代器、函数对象)
+1. 引用传递 通常更高效 并 可避免切割问题 (slicing problem)
 
-### 21. 必须返回对象时, 别妄想返回其 reference (绝不返回 pointer 或 reference 指向一个 local stack 对象, 或返回 reference 指向一个 heap-allocated 对象, 或返回 pointer 或 reference 指向一个 local static 对象而有可能同时需要多个这样的对象。)
+2. but 内置类型、STL迭代器、函数对象 推荐使用 <mark>按值传递</mark>
+
+### 21. 必须返回对象时, 别妄想返回其 reference
+
+1. 指针/引用 作为返回值时, 不要将其 指向 栈空间
+
+    会导致 指针/引用 指向 已被销毁的对象
+
+2. 引用 作为 返回值时, 不要将其 指向堆空间
+
+    会导致 内存泄漏  
+
+    ```c++
+    // 此处返回的 引用 指向堆上对象
+    xxx& operator*(const xxx lhs, const xxx rhs);
+
+    // 则 下面的式子 会调用 两次 operator*, 
+    // 但是 此处 只保存了最后一个引用, 会导致 第一次 调用 内存泄漏
+    x = a * b * c;
+    ```
+
+3. 绝不返回 pointer 或 reference 指向一个 local stack 对象, 或返回 reference 指向一个 heap-allocated 对象, 或返回 pointer 或 reference 指向一个 local static 对象而有可能同时需要多个这样的对象。)
 
 ### 22. 将成员变量声明为 private (为了封装、一致性、对其读写精确控制等)
 

@@ -2,7 +2,13 @@
 #include "TaskQueue.hh"
 #include "Thread.hh"
 #include <memory>
+#include <ostream>
 #include "WorkThread.hh"
+#include "Task.hh"
+
+using std::cout;
+using std::endl;
+
 
 ThreadPool::ThreadPool(size_t threadNum, size_t queSize) 
 : _threadNum(threadNum)
@@ -50,10 +56,13 @@ Task* ThreadPool::getTask() {
 
 void ThreadPool::doTask() {
     while (!_isExit) {
+
         Task *ptask = getTask();
+
         if (ptask) {
-            ptask->
+            ptask->process();
+        } else {
+            cout << "ptask == nullptr" << endl;
         }
     }
-
 }

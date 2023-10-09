@@ -20,10 +20,10 @@ public:
     void stop();
 
     void addTask(Task* ptask);
-    void doTask();
 
 private:
     Task* getTask();
+    void doTask();
     
 private:
     size_t _threadNum;

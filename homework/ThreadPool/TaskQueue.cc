@@ -40,12 +40,16 @@ ElemType TaskQueue::pop() {
         _notEmpty.wait();
     }
 
-    ElemType ret = _que.front();
-    _que.pop();
+    ElemType ret;
+    if (_flag) {
+        ret = _que.front();
+        _que.pop();
+    } else {
+        ret = nullptr;
+    }
 
     _mutex.unlock();
     _notFull.notifyAll();
-
     return ret;
 }
 

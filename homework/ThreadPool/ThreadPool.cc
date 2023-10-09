@@ -8,8 +8,6 @@
 #include "Task.hh"
 
 using std::cout;
-using std::endl;
-
 
 ThreadPool::ThreadPool(size_t threadNum, size_t queSize) 
 : _threadNum(threadNum)

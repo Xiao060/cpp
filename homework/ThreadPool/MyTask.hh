@@ -18,9 +18,8 @@ public:
     ~MyTask() = default;
     
     void process() override {
-        srand(time(nullptr));
 
-        int num = rand() % 1000;
+        int num = rand() % 100;
         cout << "MyTask num = " << num << endl;
     }
 };

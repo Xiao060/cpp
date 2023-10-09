@@ -9,6 +9,7 @@ using std::unique_ptr;
 
 
 int main() {
+    srand(time(nullptr));
     ThreadPool pool(4, 10);
 
     unique_ptr<Task> ptask(new MyTask());

@@ -30,8 +30,6 @@ private:
     pthread_mutex_t _mutex;
 };
 
-
 // 防止 死锁, 可以使用 RAII
-
 
 #endif

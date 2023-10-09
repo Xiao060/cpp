@@ -17,6 +17,8 @@ public:
 
     void push(ElemType value);
     ElemType pop();
+
+    void wakeup();
     
 private:
     bool empty();
@@ -27,6 +29,7 @@ private:
     MutexLock _mutex;
     Condition _notEmpty;
     Condition _notFull;
+    bool _flag;
 };
 
 #endif

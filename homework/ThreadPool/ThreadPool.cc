@@ -3,6 +3,7 @@
 #include "Thread.hh"
 #include <memory>
 #include <ostream>
+#include <unistd.h>
 #include "WorkThread.hh"
 #include "Task.hh"
 
@@ -36,7 +37,13 @@ void ThreadPool::start() {
 }
 
 void ThreadPool::stop() {
+
+    while (!_isExit) {
+        sleep(1);
+    }
+
     _isExit = true;
+    _taskQue.wakeup();
 
     for (auto& th : _threads) {
         th->stop();

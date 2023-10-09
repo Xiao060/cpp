@@ -1,4 +1,5 @@
 #include "TaskQueue.hh"
+#include "Task.hh"
 #include <cstdio>
 #include <iostream>
 #include <pthread.h>
@@ -10,7 +11,8 @@ TaskQueue::TaskQueue(size_t queSize)
 , _que()
 , _mutex()
 , _notEmpty(_mutex)
-, _notFull(_mutex) { }
+, _notFull(_mutex) 
+, _flag(true) { }
 
 TaskQueue::~TaskQueue() {
 
@@ -34,7 +36,7 @@ void TaskQueue::push(ElemType value) {
 ElemType TaskQueue::pop() {
     _mutex.lock();
 
-    while (empty()) {
+    while (empty() && _flag) {
         _notEmpty.wait();
     }
 
@@ -45,6 +47,11 @@ ElemType TaskQueue::pop() {
     _notFull.notifyAll();
 
     return ret;
+}
+
+void TaskQueue::wakeup() {
+    _flag = false;
+    _notEmpty.notifyAll();
 }
 
 bool TaskQueue::empty() {

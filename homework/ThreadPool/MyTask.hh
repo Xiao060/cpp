@@ -21,7 +21,8 @@ public:
 
         srand(time(nullptr));
 
-        while (1) {
+        int cnt = 20;
+        while (cnt--) {
             int num = rand() % 1000;
             cout << "MyTask num = " << num << endl;
         }

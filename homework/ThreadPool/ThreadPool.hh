@@ -12,6 +12,9 @@ using std::unique_ptr;
 class Thread;
 
 class ThreadPool {
+
+    friend class WorkThread;
+
 public:
     ThreadPool(size_t threadNum, size_t queSize);
     ~ThreadPool();

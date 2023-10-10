@@ -1,9 +1,11 @@
 #ifndef __MUTEXLOCK_HPP__
 #define __MUTEXLOCK_HPP__
 
+#include "NonCopyable.hh"
 #include <pthread.h>
 
-class MutexLock {
+class MutexLock 
+: NonCopyable {
 
 public:
     MutexLock();

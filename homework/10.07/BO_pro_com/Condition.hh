@@ -1,11 +1,13 @@
 #ifndef __CONDITION_HPP__
 #define __CONDITION_HPP__
 
+#include "NonCopyable.hh"
 #include <pthread.h>
 
 class MutexLock;
 
-class Condition {
+class Condition 
+: NonCopyable {
 
 public:
     Condition(MutexLock& mutex);

@@ -1,6 +1,7 @@
 #include "TaskQueue.hh"
 #include "MutexLock.hh"
 #include "MutexLockGuard.hh"
+#include <cstddef>
     
 
 
@@ -45,10 +46,14 @@ ElemType TaskQueue::pop() {
         _notEmpty.wait(); 
     }
 
-    ElemType tmp = _que.front();
-    _que.pop();
+    ElemType tmp = nullptr;
+    if (_flag) {
+        tmp = _que.front();
+        _que.pop();
 
-    _notFull.notify();
+        _notFull.notify();
+    }
+
     return tmp;
 }
 

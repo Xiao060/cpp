@@ -3,11 +3,10 @@
 
 class Task {
 public:
-
+    Task() = default;
+    virtual ~Task() {}
     
-private:
-    
-    
+    virtual void process() = 0;
 };
 
 #endif

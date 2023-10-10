@@ -15,18 +15,23 @@ public:
     TaskQueue(size_t queSize);
     ~TaskQueue();
 
-    void push(ElemType value);
+    void push(ElemType ptask);
     ElemType pop();
-    
-private:
-    bool empty();
-    bool full();
 
+    bool empty() const;
+    bool full() const;
+
+    void wakeup();
+
+private:
     size_t _queSize;   
     queue<ElemType> _que;
     MutexLock _mutex;
     Condition _notEmpty;
     Condition _notFull;
+    // 标识, 描述 进程是否状态
+    // true 正常运行, false 退出
+    bool _flag;
 };
 
 #endif

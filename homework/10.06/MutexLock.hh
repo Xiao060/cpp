@@ -1,6 +1,7 @@
 #ifndef __MUTEXLOCK_HPP__
 #define __MUTEXLOCK_HPP__
 
+#include "NonCopyable.hh"
 #include <pthread.h>
 
 // 互斥锁 / 条件变量 / 线程
@@ -14,8 +15,10 @@
 // 1. 含有 纯虚函数
 // 2. 构造/析构 protected
 
-class MutexLock {
 
+// 默认继承 为 私有继承
+class MutexLock 
+: NonCopyable {
 public:
     MutexLock();
     ~MutexLock();
@@ -23,8 +26,8 @@ public:
     void lock();
     void unlock();
     void trylock();
-    pthread_mutex_t* getMutexLockPtr();
 
+    pthread_mutex_t* getMutexLockPtr();
     
 private:
     pthread_mutex_t _mutex;

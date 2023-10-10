@@ -1,6 +1,7 @@
 #ifndef __THREAD_HPP__
 #define __THREAD_HPP__
 
+#include "NonCopyable.hh"
 #include <iostream>
 #include <pthread.h>
 
@@ -11,7 +12,9 @@ using std::endl;
 /*                               头文件                                      */
 /****************************************************************************/
 
-class Thread {
+// 默认继承 为 私有继承
+class Thread 
+: NonCopyable {
 public:
     Thread();
     virtual ~Thread();

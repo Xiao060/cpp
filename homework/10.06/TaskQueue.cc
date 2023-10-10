@@ -1,4 +1,5 @@
 #include "TaskQueue.hh"
+#include "MutexLockGuard.hh"
 #include <cstdio>
 #include <iostream>
 #include <pthread.h>
@@ -19,20 +20,21 @@ TaskQueue::~TaskQueue() {
 
 void TaskQueue::push(const int& value) {
 
-    _mutex.lock();
+    // 使用 栈对象 的 生存周期 管理资源 (上锁/解锁)
+    MutexLockGuard autoLock(_mutex);
 
     while (full()) {
         _notFull.wait();
     }
 
     _que.push(value);
-
-    _mutex.unlock();
     _notEmpty.notifyAll();
 }
 
 int TaskQueue::pop() {
-    _mutex.lock();
+
+    // 使用 栈对象 的 生存周期 管理资源 (上锁/解锁)
+    MutexLockGuard autoLock(_mutex);
 
     while (empty()) {
         _notEmpty.wait();
@@ -41,16 +43,15 @@ int TaskQueue::pop() {
     int ret = _que.front();
     _que.pop();
 
-    _mutex.unlock();
     _notFull.notifyAll();
 
     return ret;
 }
 
-bool TaskQueue::empty() {
+bool TaskQueue::empty() const {
     return _que.size() == 0;
 }
 
-bool TaskQueue::full() {
+bool TaskQueue::full() const {
     return _que.size() == _queSize;
 }

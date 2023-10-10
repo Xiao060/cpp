@@ -2,7 +2,12 @@
 #include "TaskQueue.hh"
 #include "Thread.hh"
 #include <memory>
+#include <ostream>
+#include <unistd.h>
 #include "WorkThread.hh"
+#include "Task.hh"
+
+using std::cout;
 
 ThreadPool::ThreadPool(size_t threadNum, size_t queSize) 
 : _threadNum(threadNum)
@@ -30,7 +35,13 @@ void ThreadPool::start() {
 }
 
 void ThreadPool::stop() {
+
+    while (!_taskQue.empty()) {
+        sleep(1);
+    }
+
     _isExit = true;
+    _taskQue.wakeup();
 
     for (auto& th : _threads) {
         th->stop();
@@ -50,10 +61,13 @@ Task* ThreadPool::getTask() {
 
 void ThreadPool::doTask() {
     while (!_isExit) {
+
         Task *ptask = getTask();
+
         if (ptask) {
-            ptask->
+            ptask->process();
+        } else {
+            cout << "ptask == nullptr\n";
         }
     }
-
 }

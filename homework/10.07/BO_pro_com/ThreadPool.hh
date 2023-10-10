@@ -13,19 +13,27 @@ using std::function;
 
 using Task = function<void()>;
 
+class Thread;
 
 class ThreadPool {
 
 public:
+    ThreadPool(size_t threadNum, size_t queSize);
+    ~ThreadPool();
+
+    void start();
+    void stop();
     
-    
-protected:
-    
+    void addTask(Task&& task);
+
+private: 
+    Task getTask();
+    void doTask();
     
 private:
     size_t _threadNum;
     size_t _queSize;
-    vector<unique_ptr<Task>> _threads;
+    vector<unique_ptr<Thread>> _threads;
     TaskQueue _taskQue;
     bool _isExit;
 };

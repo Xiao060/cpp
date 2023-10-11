@@ -55,12 +55,12 @@ int main(int argc, char* argv[]) {
     }
 
     // 3. 绑定 ip/port
-    // 参数 2: struct sockaddr_in 结构体, 内含 ip版本 / ip / port 信息; 
+    // 参数 2: struct sockaddr 的 指针, 指向 struct sockaddr_in 结构体
+    //         struct sockaddr_in 结构体, 内含 ip版本 / ip / port 信息; 
     //         其中 port 采用 网络字节序, 即大端存储
     //         使用时需要先取地址, 再强转成 struct sockaddr 的 指针
     //         
-    // 参数 3: struct sockaddr_in 结构体的指针
-
+    // 参数 3: struct sockaddr_in 结构体的 长度
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(atoi(argv[2]));

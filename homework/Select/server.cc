@@ -1,16 +1,19 @@
+#include <cstddef>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <netinet/in.h>
+#include <strings.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 
+const int  FDSIZE = 1024; 
 
 using std::cin;
 using std::cout;
 using std::endl;
-
-
 
 // 服务端
 // 1. sockfd() 建立 通信socket
@@ -55,11 +58,12 @@ int main(int argc, char* argv[]) {
     }
 
     // 3. 绑定 ip/port
-    // 参数 2: struct sockaddr_in 结构体, 内含 ip版本 / ip / port 信息; 
+    // 参数 2: struct sockaddr 的 指针, 指向 struct sockaddr_in 结构体
+    //         struct sockaddr_in 结构体, 内含 ip版本 / ip / port 信息; 
     //         其中 port 采用 网络字节序, 即大端存储
     //         使用时需要先取地址, 再强转成 struct sockaddr 的 指针
     //         
-    // 参数 3: struct sockaddr_in 结构体的指针
+    // 参数 3: struct sockaddr_in 结构体的 长度
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -82,9 +86,72 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    cout << "listing..." << endl;
+
+    // 设置 监听集合
+    fd_set rdset, allset;
+    FD_ZERO(&rdset);
+    FD_ZERO(&allset);
+    FD_SET(sockfd, &allset);
+
+    int maxfd = sockfd;
+
+    int fds[FDSIZE];
+    memset(fds, -1, sizeof(fds));
+    int maxIdx = -1;
 
 
-    
+
+    while (1) {
+        rdset = allset;
+        int nums = select(maxfd + 1, &rdset, nullptr, nullptr, nullptr);
+
+        if (nums == -1) {
+            perror("select");
+            close(sockfd);
+            return -1;
+        }
+
+        if (FD_ISSET(sockfd, &rdset)) {
+
+            // 5. 从 监听socket 的 全连接队列 取出一个连接 建立 通信socket
+            // 参数 2: struct sockaddr 的指针, 指向 struct sockaddr_in 结构体, 为 传入传出参数
+            // 参数 3: struct sockaddr 长度的 地址
+            struct sockaddr_in addr;
+            bzero(&addr, sizeof(addr));
+            socklen_t addrLen = sizeof(addr);
+
+            int fd = accept(sockfd, reinterpret_cast<struct sockaddr*>(&addr), &addrLen);
+            if (fd == -1) {
+                perror("accept");
+                return -1;
+            }
+
+
+            int i;
+            for (i = 0; i < FDSIZE; ++i) {
+                if (fds[i] == -1) {
+                    fds[i] = fd;
+                    maxIdx = (i > maxIdx) ? i : maxIdx;
+                    maxfd = (fd > maxfd) ? fd : maxfd;
+
+                    FD_SET(fd, &allset);
+                }
+            }
+
+            if (i == FDSIZE) {
+                perror("to many connection...");
+                return -1;
+            }
+        }
+
+        for (int i = 0; i < maxIdx; ++i) {
+            if 
+        }
+
+
+
+    }
 
     
 

@@ -1,15 +1,18 @@
 #include <cstdio>
 #include <iostream>
 #include <netinet/in.h>
+#include <strings.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/epoll.h>
 
 
 using std::cin;
 using std::cout;
 using std::endl;
 
+#define SIZE(arry) (sizeof(arry) / sizeof(arry[0]))
 
 
 // 服务端
@@ -82,11 +85,110 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    cout << "listening..." << endl;
 
+    // 使用 epoll 完成 IO 多路复用
+    // 本质是 创建一个文件对象, 对象内部 维护 2 个集合, 即 监听/就绪 集合
+    // 监听集合 底层采用 红黑树 实现, 就绪集合 采用 线性表 实现
+    // 参数 1: 为任意正整数, 无意义
+    // 返回值: epoll 文件对象的 文件描述符
+    int epfd= epoll_create(1);
+    if (epfd == -1) {
+        perror("epoll_create");
+        return -1;
+    }
 
-    
+    // 往 epoll 文件对象 的监听集合内 添加/删除 文件描述符
+    // 参数 2: 对 就绪集合 的操作,  EPOLL_CTL_ADD / EPOLL_CTL_DEL / EPOLL_CTL_MOD
+    // 参数 3: 需要 添加/删除 的 文件描述符
+    // 参数 4: 参数 3 就绪时 返回的 内容, 即 struct epoll_event 结构体
+    // 结构体 第1项 events, 就绪条件: EPOLLIN / EPOLLOUT / EPOLLERR / EPOLLET (按位或)
+    // 结构体 第2项 data 为 union, 通常返回 fd;
+    struct epoll_event event;
 
-    
+    event.events = EPOLLIN;
+    event.data.fd = sockfd;
+    ret = epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &event);
+    if (ret == -1) {
+        perror("epoll_ctl");
+        return -1;
+    }
+
+    event.events = EPOLLIN;
+    event.data.fd = STDIN_FILENO;
+    epoll_ctl(epfd, EPOLL_CTL_ADD, STDIN_FILENO, &event);
+    if (ret == -1) {
+        perror("epoll_ctl");
+        return -1;
+    }
+
+    char ip[1024];
+    char buf[1024];
+
+    struct epoll_event events[1024];
+    while (1) {
+        bzero(events, sizeof(events));
+        int nums = epoll_wait(epfd, events, SIZE(events), -1);
+        if (nums == -1) {
+            perror("epoll_wait");
+            return -1;
+        }
+
+        for (int i = 0; i < nums; ++i) {
+            
+            // 需要通过 按位与 判断 事件类型
+            // but 此处 监听事件 只有 EPOLLIN, 可省略 判断部分
+            // if (events[i].events & EPOLLIN) { }
+            int fd = events[i].data.fd;
+
+            if (fd == sockfd) {
+                struct sockaddr_in addr;
+                socklen_t addLen  = sizeof(addr);
+                int fd = accept(sockfd, reinterpret_cast<struct sockaddr*>(&addr), &addLen);
+                if (fd == -1) {
+                    perror("accept");
+                    return -1;
+                }
+
+                // 打印连接成功的消息
+                // ip 地址需要使用 inet_ntop 进行转换为 字符串
+                // 参数 1: ip 协议 
+                // 参数 2: struct sockaddr_in 中的 ip 项的地址
+                // 参数 3: 字符串 地址
+                // 返回值: 字符串 地址
+                bzero(ip, sizeof(ip));
+                inet_ntop(AF_INET, &addr.sin_addr.s_addr, ip, sizeof(ip));
+
+                cout << "receive connection from " << ip << ":" << ntohs(addr.sin_port) << endl;
+
+                event.events = EPOLLIN;
+                event.data.fd = fd;
+                int ret = epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event);
+                if (ret == -1) {
+                    perror("epoll_ctl");
+                    return -1;
+                }
+
+                continue;
+            }
+
+            if (fd == STDIN_FILENO) {
+                bzero(buf, sizeof(buf));
+                read(fd, buf, sizeof(buf));
+                continue;
+            }
+
+            bzero(buf, sizeof(buf));
+            int recvNum = recv(fd, buf, sizeof(buf), 0);
+            if (recvNum == 0) {
+                close(fd);
+                epoll_ctl(epfd, EPOLL_CTL_DEL, fd, nullptr);
+                cout << "fd = " << fd << " quit!" << endl;
+                continue;
+            }
+            cout << "client: " << buf; 
+        }
+    }
 
     return 0;
 }

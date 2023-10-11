@@ -106,6 +106,11 @@ int main(int argc, char* argv[]) {
     char buf[1024];
 
     while (1) {
+
+        // 使用 select 进行 IO 多路复用
+        // 参数 1: 最大文件描述符 + 1, 目的是 确定内核轮询的范围
+        // 参数 2-4: 监听 读/写/异常 集合
+        // 参数 5: 超时时间, 填 nullptr 为 一直等待
         rdset = allset;
         int nums = select(maxfd + 1, &rdset, nullptr, nullptr, nullptr);
 
@@ -189,6 +194,7 @@ int main(int argc, char* argv[]) {
                 int recvNums = recv(fd, buf, sizeof(buf), 0);
 
                 if (recvNums == 0) {
+                    cout << "fd = " << fd << " quit!" << endl;
                     close(fd);
                     FD_CLR(fd, &allset);
                     fds[i] = -1;

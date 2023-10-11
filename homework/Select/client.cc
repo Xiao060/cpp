@@ -62,9 +62,17 @@ int main(int argc, char* argv[]) {
     char buf[1024];
 
     while (1) {
-        rdset = allset;
 
-        int mums = select(sockfd + 1, &rdset, nullptr, nullptr, nullptr);
+        // 使用 select 进行 IO 多路复用
+        // 参数 1: 最大文件描述符 + 1, 目的是 确定内核轮询的范围
+        // 参数 2-4: 监听 读/写/异常 集合
+        // 参数 5: 超时时间, 填 nullptr 为 一直等待
+        rdset = allset;
+        int nums = select(sockfd + 1, &rdset, nullptr, nullptr, nullptr);
+        if (nums == -1) {
+            perror("select");
+            return -1;
+        }
 
         if (FD_ISSET(sockfd, &rdset)) {
             bzero(buf, sizeof(buf));

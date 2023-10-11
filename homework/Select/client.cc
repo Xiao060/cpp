@@ -2,11 +2,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <netinet/in.h>
+#include <strings.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <cstring>
 
-using std::cin;
 using std::cout;
 using std::endl;
 
@@ -49,8 +52,40 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    fd_set rdset, allset;
+    bzero(&rdset, sizeof(rdset));
+    bzero(&allset, sizeof(allset));
+
+    FD_SET(sockfd, &allset);
+    FD_SET(STDIN_FILENO, &allset);
+
+    char buf[1024];
+
+    while (1) {
+        rdset = allset;
+
+        int mums = select(sockfd + 1, &rdset, nullptr, nullptr, nullptr);
+
+        if (FD_ISSET(sockfd, &rdset)) {
+            bzero(buf, sizeof(buf));
+            int recvNums = recv(sockfd, buf, sizeof(buf), 0);
+            
+            if (recvNums == 0) {
+                cout << "server has quit!" << endl;
+                break;
+            }
+
+            cout << "server: " << buf;
+        } 
+
+        if (FD_ISSET(STDIN_FILENO, &rdset)) {
+            bzero(buf, sizeof(buf));
+            read(STDIN_FILENO, buf, sizeof(buf));
+            write(sockfd, buf, strlen(buf));
+        }
+    }
     
-    
+    close(sockfd);
 
     return 0;
 }

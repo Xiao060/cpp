@@ -11,7 +11,6 @@
 
 const int  FDSIZE = 1024; 
 
-using std::cin;
 using std::cout;
 using std::endl;
 
@@ -21,7 +20,7 @@ using std::endl;
 // 3. bind() 绑定 ip/port
 // 4. listen() 将 通信socket 转变为 监听socket
 // 5. accept() 从 监听socket 的全连接队列 取出一个连接, 建立 通信socket
-// 6. recv/send 
+// 6. recv/send or read/write 
 // 7. close()
 
 int main(int argc, char* argv[]) {
@@ -86,13 +85,14 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    cout << "listing..." << endl;
+    cout << "listening..." << endl;
 
     // 设置 监听集合
     fd_set rdset, allset;
     FD_ZERO(&rdset);
     FD_ZERO(&allset);
     FD_SET(sockfd, &allset);
+    FD_SET(STDIN_FILENO, &allset);
 
     int maxfd = sockfd;
 
@@ -100,7 +100,10 @@ int main(int argc, char* argv[]) {
     memset(fds, -1, sizeof(fds));
     int maxIdx = -1;
 
-
+    // ip 储存 连接之后, 使用 inet_ntop 转换成的 字符串ip
+    char ip[1024];
+    // buf 储存 从客户端 接收的内容
+    char buf[1024];
 
     while (1) {
         rdset = allset;
@@ -127,7 +130,18 @@ int main(int argc, char* argv[]) {
                 return -1;
             }
 
+            // 打印连接成功的消息
+            // ip 地址需要使用 inet_ntop 进行转换为 字符串
+            // 参数 1: ip 协议 
+            // 参数 2: struct sockaddr_in 中的 ip 项的地址
+            // 参数 3: 字符串 地址
+            // 返回值: 字符串 地址
+            bzero(ip, sizeof(ip));
+            inet_ntop(AF_INET, &addr.sin_addr.s_addr, ip, sizeof(ip));
 
+            cout << "receive connection from " << ip << ":" << ntohs(addr.sin_port) << endl;
+
+            // 将新连接的 通信socket 加入 监听队列, 放入 fd数组, 并 更新 maxfd/maxIdx
             int i;
             for (i = 0; i < FDSIZE; ++i) {
                 if (fds[i] == -1) {
@@ -136,6 +150,7 @@ int main(int argc, char* argv[]) {
                     maxfd = (fd > maxfd) ? fd : maxfd;
 
                     FD_SET(fd, &allset);
+                    break;
                 }
             }
 
@@ -143,17 +158,61 @@ int main(int argc, char* argv[]) {
                 perror("to many connection...");
                 return -1;
             }
+
+            --nums;
         }
 
-        for (int i = 0; i < maxIdx; ++i) {
-            if 
+        if (FD_ISSET(STDIN_FILENO, &rdset)) {
+            bzero(buf, sizeof(buf));
+            read(STDIN_FILENO, buf, sizeof(buf));
+
+            for (int i = 0; i <= maxIdx; ++i) {
+                if (fds[i] >= 0) {
+                    send(fds[i], buf, strlen(buf), 0);
+                }
+            }
+
+            --nums;
         }
 
+        if (!nums) {
+            continue;
+        }
 
+        for (int i = 0; i <= maxIdx; ++i) {
 
+            if (fds[i] >= 0 && FD_ISSET(fds[i], &rdset)) {
+
+                int fd = fds[i];
+
+                bzero(buf, sizeof(buf));
+                int recvNums = recv(fd, buf, sizeof(buf), 0);
+
+                if (recvNums == 0) {
+                    close(fd);
+                    FD_CLR(fd, &allset);
+                    fds[i] = -1;
+                } else {
+                    cout << "client: " << buf;
+                }
+
+                --nums;
+                if (!nums) {
+                    break;
+                }
+            }
+        }
     }
 
-    
+
+    for (int i = 0; i < FDSIZE; ++i) {
+        if (fds[i] >= 0) {
+            close(fds[i]);
+            fds[i] = -1;
+        }
+    }
+
+    close(sockfd);
 
     return 0;
 }

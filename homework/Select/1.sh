@@ -1,3 +1,3 @@
-g++ server.cc -o server
+g++ client.cc -o cient
 clear
-./server 127.0.0.1 1234
+./client 127.0.0.1 1234

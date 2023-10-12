@@ -22,6 +22,6 @@ Socket::~Socket() {
     close(_sockfd);
 }
 
-int Socket::getsockfd() const {
+int Socket::getfd() const {
     return _sockfd;
 }

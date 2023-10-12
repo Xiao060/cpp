@@ -22,7 +22,7 @@ void Acceptor::ready() {
 
 void Acceptor::setReuseAddr() {
     int reuse = 1;
-    int ret = setsockopt(_sock.getsockfd(), SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    int ret = setsockopt(_sock.getfd(), SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
     if (ret == -1) {
         perror("setsockopt_addr");
@@ -32,7 +32,7 @@ void Acceptor::setReuseAddr() {
 
 void Acceptor::setReusePort() {
     int reuse = 1;
-    int ret = setsockopt(_sock.getsockfd(), SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse));
+    int ret = setsockopt(_sock.getfd(), SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse));
 
     if (ret == -1) {
         perror("setsockopt_port");
@@ -42,7 +42,7 @@ void Acceptor::setReusePort() {
 
 void Acceptor::bind() {
     struct sockaddr_in* paddr = _addr.getInetAddressPtr();
-    int ret = ::bind(_sock.getsockfd(), reinterpret_cast<struct sockaddr*>(paddr), sizeof(struct sockaddr_in));
+    int ret = ::bind(_sock.getfd(), reinterpret_cast<struct sockaddr*>(paddr), sizeof(struct sockaddr_in));
 
     if (ret == -1) {
         perror("bind");
@@ -51,7 +51,7 @@ void Acceptor::bind() {
 }
 
 void Acceptor::listen() {
-    int ret = ::listen(_sock.getsockfd(), 1024);
+    int ret = ::listen(_sock.getfd(), 1024);
 
     if (ret == -1) {
         perror("listen");
@@ -62,7 +62,7 @@ void Acceptor::listen() {
 int Acceptor::accept() {
     // 第 2/3 参数 用于 获取 客户端 的 ip/port 的信息
     // 打印消息 不在此处打印, 故直接填 nullptr
-    int fd = ::accept(_sock.getsockfd(), nullptr, nullptr);
+    int fd = ::accept(_sock.getfd(), nullptr, nullptr);
 
     if (fd == -1) {
         perror("accept");
@@ -72,6 +72,6 @@ int Acceptor::accept() {
     return fd;
 }
 
-int Acceptor::getsockfd() {
-    return _sock.getsockfd();
+int Acceptor::getListenfd() {
+    return _sock.getfd();
 }

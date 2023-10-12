@@ -7,7 +7,7 @@ public:
     Socket();
     explicit Socket(int sockfd);
     ~Socket();
-    int getsockfd() const;
+    int getfd() const;
     
 private:
     int _sockfd;

@@ -8,11 +8,15 @@
 #include <sys/epoll.h>
 
 
-using std::cin;
 using std::cout;
 using std::endl;
 
-#define SIZE(arry) (sizeof(arry) / sizeof(arry[0]))
+// #define SIZE2(arry) (sizeof(arry) / sizeof(arry[0]))
+
+template <typename T>
+inline int SIZE(T& array) {
+    return sizeof(array) / sizeof(array[0]);
+}
 
 
 // 服务端
@@ -128,6 +132,13 @@ int main(int argc, char* argv[]) {
     struct epoll_event events[1024];
     while (1) {
         bzero(events, sizeof(events));
+
+        // 内核轮询, 用户等待
+        // 参数 2: struct epoll_event 的数组
+        // 当 epoll 文件对象 监听集合(红黑树) 中的 fd 就绪时 将其注册的 struct epoll_event 移入到 epoll 文件对象的 就绪集合(双链表) 内
+        // 轮询结束, 将 epoll 文件对象 的 就绪集合(内核态) 拷贝到 用户态数组 中去
+        // 参数 3: 数组长度
+        // 参数 4: 超时时间, -1 为永久等待
         int nums = epoll_wait(epfd, events, SIZE(events), -1);
         if (nums == -1) {
             perror("epoll_wait");

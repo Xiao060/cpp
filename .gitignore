@@ -2,6 +2,8 @@ build/
 
 *.txt
 log*
+client
+server
 # Prerequisites
 *.d
 

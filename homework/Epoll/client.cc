@@ -99,7 +99,12 @@ int main(int argc, char* argv[]) {
 
             if (fd == sockfd) {
                 bzero(buf, sizeof(buf));
-                recv(fd, buf, sizeof(buf), 0);
+                int recvNums = recv(fd, buf, sizeof(buf), 0);
+                if (recvNums == 0) {
+                    cout << "server quit!" << endl;
+                    close(sockfd);
+                    return -1;
+                }
                 cout << buf;
                 continue;
             }

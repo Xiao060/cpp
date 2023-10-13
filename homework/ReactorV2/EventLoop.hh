@@ -44,7 +44,10 @@ private:
 
     void waitEpollFd();
 
+
+    // 创建 tcp 对象, 注册函数, 执行 tcp 的 _onNewConnecctionCb
     void handleNewConnection();
+    // 判断 接收信息 / 断开连接, 调用子对象 的 _onMessageCb / _onCloseCb
     void handleMessage(int fd);
     
 private:
@@ -57,7 +60,8 @@ private:
     // 储存 通信fd 及 对应的TcpConnection
     map<int, shared_ptr<TcpConnection>> _conns;
 
-    // 
+    // 3 个回调函数, 函数类型为 function<void(const shared_ptr<TcpConnecction>&)> 
+    // 会被 Tcp 注册, 然后 Tcp 回调该函数
     TcpConnectionCallback _onNewConnectionCb;
     TcpConnectionCallback _onMessageCb;
     TcpConnectionCallback _onCloseCb;

@@ -1,16 +1,20 @@
 #include "EventLoop.hh"
 #include "Acceptor.hh"
+#include "TcpConnection.hh"
 #include <algorithm>
 #include <asm-generic/errno-base.h>
 #include <cstdio>
 #include <iostream>
+#include <memory>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <utility>
 #include <vector>
 
 
 using std::cout;
 using std::endl;
+using std::make_pair;
 
 
 EventLoop::EventLoop(Acceptor& acceptor) 
@@ -136,3 +140,34 @@ void EventLoop::setCloseCallback(TcpConnectionCallback&& cb) {
     _onMessageCb = std::move(cb);
 }
 
+
+// 处理新的连接
+// 1. 调用 链接器 建立新连接 (获取 新的文件描述符)
+// 2. 将 fd 加入 epoll 监听
+// 3. 为 新fd 建立 真正的 tcp连接
+// 4. 把 fd:tcp 加入 map
+// 5. 注册回调函数
+// 6. 调用 tcp 的 _onNewConnectionCb 函数
+void EventLoop::handleNewConnection() {
+    int fd = _acceptor.accept();
+
+    if (fd == -1) {
+        perror("handleNewConnection");
+        return ;
+    }
+
+    addEpollReadFd(fd);
+    TcpConnectionPtr pTcp(new TcpConnection(fd));
+
+    pTcp->setNewConnectionCallback(_onNewConnectionCb);
+    pTcp->setMessageCallback(_onMessageCb);
+    pTcp->setCloseCallback(_onCloseCb);
+
+    _conns.insert(make_pair(fd, pTcp));
+
+    pTcp->handleNewConnectionCallback();
+}
+
+void EventLoop::handleMessage(int fd) {
+
+}

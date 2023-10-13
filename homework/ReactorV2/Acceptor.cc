@@ -75,6 +75,6 @@ int Acceptor::accept() {
     return fd;
 }
 
-int Acceptor::getListenfd() {
+int Acceptor::getListenFd() {
     return _sock.getfd();
 }

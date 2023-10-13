@@ -21,7 +21,7 @@ private:
     
 public:
     int accept();
-    int getListenfd();
+    int getListenFd();
     
 private:
     Socket _sock;

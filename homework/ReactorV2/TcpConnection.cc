@@ -80,3 +80,12 @@ string TcpConnection::toString() {
 
     return oss.str();
 }
+    
+
+bool TcpConnection::isClosed() const {
+
+    char buf[10] = {0};
+    int ret = recv(_sock.getfd(), buf, sizeof(buf), MSG_PEEK);
+
+    return ret == 0;
+}

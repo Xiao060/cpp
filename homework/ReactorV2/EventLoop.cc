@@ -170,4 +170,27 @@ void EventLoop::handleNewConnection() {
 
 void EventLoop::handleMessage(int fd) {
 
+    // 需要 获取 fd 对应的 tcp 进行实际通信
+    // 如果 recv 接收数量为 0, 则 需要 从 map 中 删除对应 pair
+
+    // 正常情况下 fd 肯定存在 _conns map 中, 但是建议 增加 检测机制, 增强代码健壮性
+    auto iter = _conns.find(fd);
+
+    if (iter == _conns.end()) {
+        cout << ">>This connection is not exit!" << endl;
+        return ;
+    }
+
+    // shared_ptr<TcpConnection> spTcp = _conns[fd];
+    shared_ptr<TcpConnection> spTcp = iter->second;
+    bool isClose = spTcp->isClosed();
+
+    if (isClose) {
+        spTcp->handleCloseCallback();
+        delEpollReadFd(fd);
+        // _conns.erase(fd);
+        _conns.erase(iter);
+    } else {
+        spTcp->handleMessageCallback();
+    }
 }

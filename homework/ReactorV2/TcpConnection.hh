@@ -39,7 +39,7 @@ public:
     string receive();
     void send(const string& msg);
 
-    bool isClosed();
+    bool isClosed() const;
 
 private:
     // 用于 初始化 _localAddr / _peerAddr 成员

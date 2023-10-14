@@ -89,3 +89,39 @@ bool TcpConnection::isClosed() const {
 
     return ret == 0;
 }
+
+// 用于注册 3 个回调函数, 在 EventLoop 中接收到 新连接时, 创建 tcp 后 调用
+void TcpConnection::setNewConnectionCallback(const TcpConnectionCallback& cb) {
+    _onNewConnectionCb = cb;
+}
+
+void TcpConnection::setMessageCallback(const TcpConnectionCallback& cb) {
+    _onMessageCb  = cb;
+}
+
+void TcpConnection::setCloseCallback(const TcpConnectionCallback& cb) {
+    _onCloseCb = cb;
+}
+
+
+// 调用 3 个 回调函数, 在 EventLoop 中 建立新连接(tcp)时 会在 tcp 中注册 3 个回调函数, 
+// 当注册完后, EventLoop 会 调用 tcp 的 handleNewConnectionCallback 
+// 当已建立的连接 就绪时, 若 未关闭, 则 EventLoop 会调用 tcp 的 handleMessageCallback
+// 若连接 关闭, 则 EventLoop 会调用 tcp 的 handleCloseCallback
+void TcpConnection::handleNewConnectionCallback() {
+    if (_onNewConnectionCb) {
+        _onNewConnectionCb(shared_from_this());
+    }
+}
+
+void TcpConnection::handleMessageCallback() {
+    if (_onMessageCb) {
+        _onMessageCb(shared_from_this());
+    }
+}
+
+void TcpConnection::handleCloseCallback() {
+    if (_onCloseCb) {
+        _onCloseCb(shared_from_this());
+    }
+}

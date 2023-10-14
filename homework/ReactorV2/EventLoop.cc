@@ -171,7 +171,10 @@ void EventLoop::handleNewConnection() {
 void EventLoop::handleMessage(int fd) {
 
     // 需要 获取 fd 对应的 tcp 进行实际通信
-    // 如果 recv 接收数量为 0, 则 需要 从 map 中 删除对应 pair
+    // 判断 连接是否 关闭
+    // 如果 recv 接收数量为 0, 即 连接关闭
+    // 则 需要 从map中 删除对应 pair, 将 pair 移除监听, 并调用 tcp 的 _onCloseConnectionCb 函数
+    // 否则 调用 tcp 的 _onMessageConnectionCb 函数
 
     // 正常情况下 fd 肯定存在 _conns map 中, 但是建议 增加 检测机制, 增强代码健壮性
     auto iter = _conns.find(fd);

@@ -1,4 +1,5 @@
 #include "SocketIO.hh"
+#include "InetAddress.hh"
 #include <asm-generic/errno-base.h>
 #include <cstdio>
 #include <sys/socket.h>
@@ -17,6 +18,22 @@ SocketIO::~SocketIO() {
 
 int SocketIO::readn(char* buf, int len) {
 
+    // 此处 使用 do_while 循环来处理 中断的问题, 保证能进行一次完整的 recv
+    // 使用 do-while 使 后续代码 减少一层缩进, 可读性更强, 更美观
+    int ret = 0;
+    do {
+        ret = recv(_connfd, buf, len, MSG_WAITALL);
+    } while (ret == -1 && errno == EINTR);
+
+    if (ret == -1) {
+        perror("recv_readn");
+        return -1;
+    }
+
+    return 0;
+
+    /*************************************************************************************************/
+    /*
     while (1) {
         int ret = recv(_connfd, buf, len, MSG_WAITALL);
 
@@ -31,7 +48,9 @@ int SocketIO::readn(char* buf, int len) {
 
         return 0;
     }
+    */
 
+    /*************************************************************************************************/
     /*
     // 读取 n 个 字符, 返回值为 最终读取的 字符数量
     int left = len;
@@ -109,6 +128,22 @@ int SocketIO::readLine(char* buf, int len) {
 
 int SocketIO::write(const char* buf, int len) {
 
+    // 此处 使用 do_while 循环来处理 中断的问题, 保证能进行一次完整的 send
+    // 使用 do-while 使 后续代码 减少一层缩进, 可读性更强, 更美观
+    int ret = 0;
+    do {
+        ret = send(_connfd, buf, len, 0);
+    } while (ret == -1 && errno == EINTR);
+
+    if (ret == -1) {
+        perror("send_write");
+        return -1;
+    }
+
+    return 0;
+
+    /**********************************************************************************************/
+    /*
     while (1) {
         int ret = send(_connfd, buf, len, 0);
     
@@ -123,4 +158,5 @@ int SocketIO::write(const char* buf, int len) {
 
         return 0;
     }
+    */
 }

@@ -108,6 +108,9 @@ void TcpConnection::setCloseCallback(const TcpConnectionCallback& cb) {
 // 当注册完后, EventLoop 会 调用 tcp 的 handleNewConnectionCallback 
 // 当已建立的连接 就绪时, 若 未关闭, 则 EventLoop 会调用 tcp 的 handleMessageCallback
 // 若连接 关闭, 则 EventLoop 会调用 tcp 的 handleCloseCallback
+
+// 3 个 回调函数 类型为 function<void(const shared_ptr<TcpConnection>&)>, 即参数类型 为 智能指针的 const 引用
+// 所以 需要 使 该类 继承 enable_shared_from_this<...>, 然后调用 shared_from_this 函数获取 该对象的智能指针
 void TcpConnection::handleNewConnectionCallback() {
     if (_onNewConnectionCb) {
         _onNewConnectionCb(shared_from_this());

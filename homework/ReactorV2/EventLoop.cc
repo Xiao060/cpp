@@ -137,7 +137,7 @@ void EventLoop::setMessageCallback(TcpConnectionCallback&& cb) {
 }
 
 void EventLoop::setCloseCallback(TcpConnectionCallback&& cb) {
-    _onMessageCb = std::move(cb);
+    _onCloseCb = std::move(cb);
 }
 
 

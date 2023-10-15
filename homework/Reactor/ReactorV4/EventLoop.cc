@@ -1,5 +1,7 @@
 #include "EventLoop.hh"
 #include "Acceptor.hh"
+#include "MutexAutoLock.hh"
+#include "MutexLock.hh"
 #include "TcpConnection.hh"
 #include <algorithm>
 #include <asm-generic/errno-base.h>
@@ -7,9 +9,11 @@
 #include <iostream>
 #include <memory>
 #include <sys/epoll.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <utility>
 #include <vector>
+#include <sys/eventfd.h>
 
 
 using std::cout;
@@ -197,3 +201,70 @@ void EventLoop::handleMessage(int fd) {
         spTcp->handleMessageCallback();
     }
 }
+
+
+
+// ADD:
+
+int EventLoop::createEventfd() {
+    int fd = eventfd(10, 0);
+
+    if (fd == -1) {
+        perror("eventfd");
+    }
+
+    return fd;
+}
+
+
+// 读取 eventfd
+void EventLoop::handleRead() {
+
+}
+
+
+void EventLoop::storeInLoop(Functor&& cb) {
+
+    // 1. 将 [业务 + tcp] 储存在 待发送数组中
+    // 待发送数组 为 共享数据, 访问需要加锁
+    // 使用 栈对象的生命周期 来管理互斥锁
+    // 唤醒之后 eventloop 会去 待发送数组 取出任务并发送
+    // 故 唤醒之前 需要解锁, 即 将 下 2 行 放在一个作用域中
+    {
+        MutexAutoLock autoLook(_mutex);
+        _pendings.push_back(std::move(cb));
+    }
+
+    // 2. 唤醒 eventfd, eventloop 调用 tcp
+    wakeup();
+}
+
+void EventLoop::wakeup() {
+    // 唤醒 eventfd, 即 往 eventfd 中 写入
+    uint64_t one = 1;
+    ssize_t ret = write(_evtfd, &one, sizeof(one));
+    
+    if (ret != sizeof(one)) {
+        perror("write_wakeup");
+        return;
+    }
+}
+
+
+
+void EventLoop::doPengdingFunctors() {
+    // 将 待发送数组中的任务 取出到一个临时数组中
+    // 防止因此处长时间占用锁 导致 其他 [业务 + tcp] 无法加入数组
+    vector<Functor> tmp;
+    {
+        MutexAutoLock autoLock(_mutex);
+        tmp.swap(_pendings);
+    }
+
+    // 遍历 进行消息的发送
+    for (auto& cb : tmp) {
+        cb();
+    }
+}
+
+// END:

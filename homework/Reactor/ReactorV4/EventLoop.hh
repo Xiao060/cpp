@@ -2,6 +2,7 @@
 #define __EVENTLOOP_HPP__
 
 #include "Acceptor.hh"
+#include "MutexLock.hh"
 #include "TcpConnection.hh"
 #include <cinttypes>
 #include <functional>
@@ -21,6 +22,9 @@ class EventLoop {
 
     using TcpConnectionPtr = shared_ptr<TcpConnection>;
     using TcpConnectionCallback = function<void(const TcpConnectionPtr&)>;
+    // ADD:
+    using Functor = function<void()>;
+    // END:
 
 public:
     EventLoop(Acceptor& acceptor);
@@ -35,6 +39,19 @@ public:
     void loop();
     void unloop();
 
+    // ADD:
+    // tcp 调用 handleMessage 处理 任务
+    // 即 调用 tcp 中的回调函数 先对任务进行预处理
+    // 然后 回调函数会 将 [业务 + tcp] 添加到 线程池的任务队列中
+    // 线程池 将 业务 处理完毕后 会将 [业务 + tcp] 通过 tcp 的 sendInLoop 添加到 eventloop 的 待发送数组中
+    // sendInLoop 实际是调用 eventloop 的 storeInLoop 函数
+    // storeInLoop 函数 先将 [业务 + tcp] 储存在待发送数组 后, 然后会调用 wakeup 函数 唤醒 eventfd
+    // EventLoop 中的 epoll 监听到 eventfd 会将 待发送数组中的 [业务 + tcp] 取出, 发送信息
+    void wakeup();
+    void storeInLoop(Functor&& cb);
+    void doPengdingFunctors();
+    // END:
+
 private:
     // 用于初始化 epfd 成员变量
     int createEpollFd();
@@ -44,16 +61,19 @@ private:
 
     void waitEpollFd();
 
-
     // 创建 tcp 对象, 注册函数, 执行 tcp 的 _onNewConnecctionCb
     void handleNewConnection();
     // 判断 接收信息 / 断开连接, 调用子对象 的 _onMessageCb / _onCloseCb
     void handleMessage(int fd);
+
+    // ADD:
+    int createEventfd();
+    // 读取 eventfd
+    void handleRead();
+    // END:
     
 private:
     // ADD:
-    using Functor = function<void()>;
-
     // 用于线程间通信, 即 线程池中的 线程 与 EventLoop 线程通信
     // EventLoop 监听到 新消息, 会调用 Tcp 的 handleMessage 进行处理
     // Tcp 实际上是调用注册在 其中的 回调函数 进行处理
@@ -63,9 +83,8 @@ private:
     // runInLoop 函数 将待发送的任务 存入vector, 并唤醒 eventfd(向eventfd写入)
     // EventLoop 中的 evenftd 被 epoll 监听到, eventloop 会 将 待发送任务从 vector 中取出 并 进行发送
     int _evtfd;
-
     vector<Functor> _pendings;
-    
+    MutexLock _mutex;
     // END:
 
     int _epfd;

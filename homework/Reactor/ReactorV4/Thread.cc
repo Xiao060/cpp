@@ -20,6 +20,8 @@ Thread::Thread(ThreadCallback&& cb)
 
 Thread::~Thread() { }
 
+
+// 创建线程
 void Thread::start() {
     //  pthread_create
     // 参数 3: 为 子线程的 入口函数, 类型为 void*(void*), 如果该函数为普通成员函数, 则 其类型为 void*(Thread*, void*)
@@ -33,12 +35,12 @@ void Thread::start() {
         perror("pthread_create");
         return;
     }
-
     isRunning = true;
 }
 
-void Thread::stop() {
 
+// 将 子线程 join, 主线程会等待 子线程退出 并 清理子线程
+void Thread::stop() {
     if (isRunning) {
         int ret = pthread_join(_thid, nullptr);
 

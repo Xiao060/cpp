@@ -1,6 +1,7 @@
 #include "TaskQueue.hh"
 #include "MutexAutoLock.hh"
 #include "MutexLock.hh"
+#include <utility>
 
 
 using ElemType = function<void()>;
@@ -12,11 +13,9 @@ TaskQueue::TaskQueue(size_t queSize)
 , _notFull(_mutex) 
 , _queSize(queSize)
 , _que() 
-, _flag(true) { }
+, _isAlive(true) { }
 
-TaskQueue::~TaskQueue() {
-    _flag = false; 
-}
+TaskQueue::~TaskQueue() { }
 
 
 bool TaskQueue::isEmpty() {
@@ -29,28 +28,40 @@ bool TaskQueue::isFull() {
 
 
 void TaskQueue::push(ElemType&& task) {
-    MutexAutoLock mutex(_mutex);
+    MutexAutoLock autoLock(_mutex);
 
     while (isFull()) {
         _notFull.wait();
     }
 
-    _que.push(task);
+    _que.push(std::move(task));
+
+    _notEmpty.notify();
 }
 
 ElemType TaskQueue::pop() {
-    MutexAutoLock mutex(_mutex);
+    MutexAutoLock autoLock(_mutex);
 
-    while (isEmpty()) {
+    // 出队时 只有 任务队列未退出 且 任务队列为空 才阻塞
+    while (_isAlive && isEmpty()) {
         _notEmpty.wait();
     }
 
-    ElemType elem = _que.front();
-    _que.pop();
+    // 若 线程池已退出, 则 直接返回 nullptr
+    // 若 未退出, 则正常pop, 并唤醒 _notFull 队列
+    ElemType task;
+    if (_isAlive) {
+        task = _que.front();
+        _que.pop();
+        _notFull.notify();
+    } else {
+        task = nullptr;
+    }
 
-    return elem;
+    return task;
 }
 
 void TaskQueue::wakeup() {
-
+    _isAlive = false;
+    _notEmpty.notifyAll();
 }

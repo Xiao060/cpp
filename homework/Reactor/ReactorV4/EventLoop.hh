@@ -51,6 +51,23 @@ private:
     void handleMessage(int fd);
     
 private:
+    // ADD:
+    using Functor = function<void()>;
+
+    // 用于线程间通信, 即 线程池中的 线程 与 EventLoop 线程通信
+    // EventLoop 监听到 新消息, 会调用 Tcp 的 handleMessage 进行处理
+    // Tcp 实际上是调用注册在 其中的 回调函数 进行处理
+    // 回调函数 先 对消息进行 预处理, 然后将 [消息 + tcp] 放入 线程池的任务队列, 其中 tcp 用于 把 待发送(处理完成)的任务, 传送给 eventloop
+    // 线程池 的 子线程 进行 业务处理, 处理完毕后需要 借助 tcp 把 待发送的业务 传递给 EventLoop
+    // 其中 tcp 传递 待发送业务 给 EventLoop 其实是在 调用 EventLoop 的 runInLoop 函数, 故 tcp 应包含 eventloop 的 指针/引用
+    // runInLoop 函数 将待发送的任务 存入vector, 并唤醒 eventfd(向eventfd写入)
+    // EventLoop 中的 evenftd 被 epoll 监听到, eventloop 会 将 待发送任务从 vector 中取出 并 进行发送
+    int _evtfd;
+
+    vector<Functor> _pendings;
+    
+    // END:
+
     int _epfd;
     // 储存 epoll_wait 监听后返回的 epoll_event 
     vector<struct epoll_event> _evtList;

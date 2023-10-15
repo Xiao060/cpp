@@ -1,7 +1,9 @@
 #ifndef __SOCKET_HPP__
 #define __SOCKET_HPP__
 
-class Socket {
+#include "NonCopyable.hh"
+class Socket 
+: NonCopyable {
 
 public:
     Socket();

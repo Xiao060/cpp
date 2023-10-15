@@ -3,7 +3,6 @@
 
 #include "Acceptor.hh"
 #include "MutexLock.hh"
-#include "TcpConnection.hh"
 #include <cinttypes>
 #include <functional>
 #include <map>
@@ -16,6 +15,8 @@ using std::map;
 using std::shared_ptr;
 using std::function;
 using std::shared_ptr;
+
+class TcpConnection;
 
 
 class EventLoop {

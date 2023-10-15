@@ -1,12 +1,14 @@
 #ifndef __TCPCONNECTION_HPP__
 #define __TCPCONNECTION_HPP__
 
+#include "EventLoop.hh"
 #include "InetAddress.hh"
 #include "Socket.hh"
 #include "SocketIO.hh"
 #include <functional>
 #include <memory>
 #include <sys/socket.h>
+#include <type_traits>
 
 using std::shared_ptr;
 using std::function;
@@ -23,7 +25,7 @@ class TcpConnection
     using TcpConnectionCallback = function<void(const TcpConnectionPtr&)>;
 
 public:
-    explicit TcpConnection(int fd);
+    explicit TcpConnection(int fd, EventLoop* ploop);
     ~TcpConnection();
 
     // 用于注册 3 个回调函数, 在 EventLoop 中接收到 新连接时, 创建 tcp 后 调用
@@ -48,6 +50,10 @@ public:
 
     bool isClosed() const;
 
+    // ADD:
+    void sendInLoop(const string& msg);
+    // END:
+
 private:
     // 返回 InetAddress 对象, 
     // 用于 初始化 _localAddr / _peerAddr 成员
@@ -70,6 +76,10 @@ private:
     TcpConnectionCallback _onNewConnectionCb;
     TcpConnectionCallback _onMessageCb;
     TcpConnectionCallback _onCloseCb;
+
+    // ADD:
+    EventLoop* _loop;
+    // END:
 };
 
 #endif

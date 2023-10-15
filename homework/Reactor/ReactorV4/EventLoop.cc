@@ -25,17 +25,20 @@ EventLoop::EventLoop(Acceptor& acceptor)
 : _epfd(createEpollFd())
 , _evtList(1024)
 , isLooping(false) 
-, _acceptor(acceptor) { 
+, _acceptor(acceptor)
+, _evtfd(createEventfd()) { 
 
     // Acceptor 中的 包含 两个子对象
     // 1. Socket, 此 socket 其实是服务端 最初的通信sock, 被acceptor变为 监听sock 
     // 2. InetAddress, 储存 服务端的 ip/port 信息
     int listenfd = acceptor.getListenFd();
     addEpollReadFd(listenfd);
+    addEpollReadFd(_evtfd);
 }
 
 EventLoop::~EventLoop() {
     close(_epfd);
+    close(_evtfd);
 }
 
 
@@ -46,7 +49,6 @@ int EventLoop::createEpollFd() {
         perror("epoll_create") ;
         return -1;
     }
-
     return epfd;
 }
 
@@ -101,11 +103,16 @@ void EventLoop::waitEpollFd() {
     }
 
     for (int i = 0; i < nums; ++i) {
-
         int fd = _evtList[i].data.fd;
 
         if (fd == _acceptor.getListenFd()) {
             handleNewConnection();
+            continue;
+        }
+
+        if (fd == _evtfd) {
+            handleRead();
+            doPengdingFunctors();
             continue;
         }
 
@@ -161,7 +168,7 @@ void EventLoop::handleNewConnection() {
     }
 
     addEpollReadFd(fd);
-    TcpConnectionPtr pTcp(new TcpConnection(fd));
+    TcpConnectionPtr pTcp(new TcpConnection(fd, this));
 
     pTcp->setNewConnectionCallback(_onNewConnectionCb);
     pTcp->setMessageCallback(_onMessageCb);
@@ -219,7 +226,13 @@ int EventLoop::createEventfd() {
 
 // 读取 eventfd
 void EventLoop::handleRead() {
+    uint64_t one = 1;
+    ssize_t ret = read(_evtfd, &one, sizeof(one));
 
+    if (ret != sizeof(one)) {
+        perror("read");
+        return;
+    }
 }
 
 
@@ -239,6 +252,7 @@ void EventLoop::storeInLoop(Functor&& cb) {
     wakeup();
 }
 
+
 void EventLoop::wakeup() {
     // 唤醒 eventfd, 即 往 eventfd 中 写入
     uint64_t one = 1;
@@ -249,7 +263,6 @@ void EventLoop::wakeup() {
         return;
     }
 }
-
 
 
 void EventLoop::doPengdingFunctors() {

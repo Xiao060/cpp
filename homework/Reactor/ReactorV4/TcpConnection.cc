@@ -1,21 +1,25 @@
 #include "TcpConnection.hh"
+#include "EventLoop.hh"
 #include "InetAddress.hh"
 #include "SocketIO.hh"
+#include <algorithm>
 #include <cstddef>
 #include <cstdio>
+#include <functional>
 #include <netinet/in.h>
 #include <sstream>
 #include <string>
 #include <sys/socket.h>
 
 using std::ostringstream;
+using std::bind;
 
-
-TcpConnection::TcpConnection(int fd) 
+TcpConnection::TcpConnection(int fd, EventLoop* ploop) 
 : _sock(fd) 
 , _socketIO(fd) 
 , _localAddr(getLocalAddr()) 
-, _peerAddr(getPeerAddr()) { }
+, _peerAddr(getPeerAddr()) 
+, _loop(ploop) { }
 
 TcpConnection::~TcpConnection() {
 
@@ -128,3 +132,11 @@ void TcpConnection::handleCloseCallback() {
         _onCloseCb(shared_from_this());
     }
 }
+
+// ADD:
+void TcpConnection::sendInLoop(const string& msg) {
+    if (_loop) {
+        _loop->storeInLoop(bind(&TcpConnection::send, this, msg));
+    }
+}
+// END:

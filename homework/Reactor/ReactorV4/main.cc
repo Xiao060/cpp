@@ -51,6 +51,7 @@ int main(int argc, char* argv[]) {
     TcpServer tcps("127.0.0.1", 1234);
 
     // QUES: 该函数的 声明中 参数为右值, 为什么 调用时可以传左值
+    // NOTE: C 语言 函数名即函数指针比较特殊, 即可看作左值也可看作右值
     tcps.setAllCallback(onNewConnection, onMessage, onClose);
     // tcps.setAllCallback(std::move(onNewConnection), std::move(onMessage), std::move(onClose));
 

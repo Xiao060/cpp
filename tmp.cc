@@ -16,10 +16,10 @@ public:
 
     Thread(ThreadCallback&& cb);
     ~Thread();
-   
+
     void start();
     void stop();
-   
+
 private:
     static void* threadFunc(void* args);
 
@@ -35,7 +35,7 @@ Thread::Thread(ThreadCallback&& cb)
 , _cb(std::move(cb)) { }
 
 Thread::~Thread() { }
-   
+
 void Thread::start() {
 
     int ret = pthread_create(&_thid, nullptr, threadFunc, this);

@@ -1,86 +1,122 @@
-#include <arpa/inet.h>
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <string>
-#include <fstream>
-#include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <pthread.h>
 
-
-#define LISTENQ 5
-
-
-std::string read_image(const std::string& image_path);
-int send_image(int & fd, std::string& image);
-int main(){
-    int listenfd, connfd;
-    
-    listenfd = socket(AF_INET, SOCK_STREAM, 0);
-    if(listenfd < 0){
-        std::cout << "create socketfd failed" <<std::endl;
-        return 0;
+/*
+函数功能: 服务器向客户端发送响应数据
+*/
+int HTTP_ServerSendFile(int client_fd,char *buff,char *type,char *file)
+{
+    /*1. 打开文件*/
+    int fd=open(file,2);
+    if(fd<0)return -1;
+    /*2. 获取文件大小*/
+    struct stat s_buff;
+    fstat(fd,&s_buff);
+    /*3. 构建响应头部*/
+    sprintf(buff,"HTTP/1.1 200 OK\r\n"
+                "Content-type:%s\r\n"
+                "Content-Length:%d\r\n"
+                "\r\n",type,s_buff.st_size);
+    /*4. 发送响应头*/
+    if(write(client_fd,buff,strlen(buff))!=strlen(buff))return -2;
+    /*5. 发送消息正文*/
+    int cnt;
+    while(1)
+    {
+        cnt=read(fd,buff,1024);
+        if(write(client_fd,buff,cnt)!=cnt)return -3;
+        if(cnt!=1024)break;
     }
-
-    struct sockaddr_in servaddr;
-    bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = inet_addr("192.168.23.133"); 
-    servaddr.sin_port = htons(8888);
-    
-    int bind_ok = bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
-    if(bind_ok < 0){
-        std::cout << "bind socket with server address  failed" <<std::endl;
-        return 0;
-    }
-    
-    int listen_ok = listen(listenfd, LISTENQ);
-    if(listen_ok < 0){
-        std::cout << "listen socket  failed" <<std::endl;
-        return 0;
-    }
-
-    std::string img = read_image("lin.png");
-    int write_ok;
-    while(1){
-        connfd = accept(listenfd, NULL, NULL);
-        if(connfd < 0){
-            std::cout << "create connection socket failed" <<std::endl;
-            return 0;
-        }
-
-        write_ok = send_image(connfd, img);
-        if(write_ok < 0){
-            std::cout << "write info to connection socket failed" <<std::endl;
-            close(connfd);
-            return 0;
-        }
-        close(connfd);
-    }
+    return 0;
 }
 
-std::string read_image(const std::string& image_path){
-    std::ifstream is(image_path.c_str(), std::ifstream::in);
-    is.seekg(0, is.end);
-    int flength = is.tellg();
-    is.seekg(0, is.beg);
-    char * buffer = new char[flength];
-    is.read(buffer, flength);
-    std::string image(buffer, flength);
-    return image;
+/*线程工作函数*/
+void *thread_work_func(void *argv)
+{
+    int client_fd=*(int*)argv;
+    free(argv);
+
+    unsigned int cnt;
+    unsigned char buff[1024];
+    //读取浏览器发送过来的数据
+    cnt=read(client_fd,buff,1024);
+    buff[cnt]='\0';
+    printf("%s\n",buff);
+
+    if(strstr(buff,"GET / HTTP/1.1"))
+    {
+        HTTP_ServerSendFile(client_fd,buff,"text/html","www/image_text.html");
+    }
+    else if(strstr(buff,"GET /www/123.jpg HTTP/1.1"))
+    {
+        HTTP_ServerSendFile(client_fd,buff,"image/jpeg","www/888.jpg");
+    }
+    else if(strstr(buff,"GET /favicon.ico HTTP/1.1"))
+    {
+        HTTP_ServerSendFile(client_fd,buff,"image/x-icon","www/1.ico");
+    }
+    
+    close(client_fd);
+    //退出线程
+    pthread_exit(NULL);
 }
 
-int send_image(int & fd, std::string& image){
-	 // 创建响应实体
-    int body_length = image.size();
-    const char * body = image.data();
-    int response_length = body_length;
-    char * buffer = new char[response_length];
-    memcpy(buffer, body, body_length);
-    // 将响应写入发送缓冲区，并发送
-    int ret = write(fd, buffer, response_length);
-	 // 清理
-    delete [] buffer;
-    return ret;
+int main(int argc,char **argv) {   
+    int sockfd;
+    /*1. 创建socket套接字*/
+    sockfd=socket(AF_INET,SOCK_STREAM,0);
+    int on = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+
+    /*2. 绑定端口号与IP地址*/
+    struct sockaddr_in addr;
+    addr.sin_family=AF_INET;
+    addr.sin_port=htons(atoi(argv[1])); // 端口号0~65535
+    addr.sin_addr.s_addr=INADDR_ANY;    //inet_addr("0.0.0.0"); //IP地址
+    if(bind(sockfd,(const struct sockaddr *)&addr,sizeof(struct sockaddr))!=0)
+    {
+        printf("服务器:端口号绑定失败.\n");
+    }
+    /*3. 设置监听的数量,表示服务器同一时间最大能够处理的连接数量*/
+    listen(sockfd,20);
+
+    /*4. 等待客户端连接*/
+    int *client_fd;
+    struct sockaddr_in client_addr;
+    socklen_t addrlen;
+    pthread_t thread_id;
+    while(1)
+    {
+        addrlen=sizeof(struct sockaddr_in);
+        client_fd= (int*) malloc(sizeof(int));
+        *client_fd=accept(sockfd,(struct sockaddr *)&client_addr,&addrlen);
+        
+        printf("连接的客户端IP地址:%s\n",inet_ntoa(client_addr.sin_addr));
+        printf("连接的客户端端口号:%d\n",ntohs(client_addr.sin_port));
+
+        /*创建线程*/
+        if(pthread_create(&thread_id,NULL,thread_work_func,client_fd))
+        {
+            printf("线程创建失败.\n");
+            break;
+        }
+
+    } 
+    /*5. 关闭连接*/
+    close(sockfd);
+    return 0;
 }

@@ -14,7 +14,7 @@ public:
 
 private:
     string sendHtml();
-    string sendPng();
+    void sendPng(int fd);
 
 private:
     string _ip;

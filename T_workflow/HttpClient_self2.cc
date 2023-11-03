@@ -136,10 +136,10 @@ int main(int argc, char* argv[]) {
     char reqBody[] = "Hello, Server";
     req->append_output_body(reqBody, strlen(reqBody));
 
-
+    // 3. 开始任务
     httpTask->start(); 
 
-    // 阻塞, 等待任务全部执行完毕 再继续向下执行
+    // 4. 阻塞, 等待任务全部执行完毕 再继续向下执行
     waitGroup.wait();
     return 0;
 }

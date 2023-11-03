@@ -8,6 +8,7 @@
 #include <workflow/WFFacilities.h>
 #include <workflow/WFTask.h>
 #include <workflow/WFTaskFactory.h>
+#include <workflow/Workflow.h>
 
 using std::cin;
 using std::cout;

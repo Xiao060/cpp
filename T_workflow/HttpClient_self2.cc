@@ -80,10 +80,12 @@ void httpCallback(WFHttpTask* httpTask) {
         cout << key1 << ": " << value1 << endl;
     }
     // 获取 请求报文报文体
-    // const void* reqBody = nullptr;
-    // size_t reqSize = 0;
-    // req->get_outputbody_blocks(&reqBody, &reqSize, 100);
-    void* reqBody = new char[30];
+    // const void* reqBody[20] = {0};
+    // size_t reqSize[20] = {0};
+    // req->get_output_body_blocks(reqBody, reqSize, 100);
+
+    // void* reqBody = new char[30];
+    char reqBody[30] = {0};
     size_t reqSize = 30;
     req->get_output_body_merged(reqBody, &reqSize);
     cout << endl << (char*) reqBody << endl;

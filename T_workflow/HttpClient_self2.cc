@@ -82,7 +82,6 @@ void httpCallback(WFHttpTask* httpTask) {
     // 获取 请求报文报文体
     // const void* reqBody = nullptr;
     // size_t reqSize = 0;
-    // req->get_parsed_body(&reqBody, &reqSize);
     // req->get_outputbody_blocks(&reqBody, &reqSize, 100);
     void* reqBody = new char[30];
     size_t reqSize = 30;

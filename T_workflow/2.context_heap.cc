@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
     // 猜测 通过 series_of() 获取序列, 然后使用 delete 释放序列
     SeriesWork* series = Workflow::create_series_work(redisTask1, nullptr);
     series->push_back(redisTask2);
-
+    
     // 设置 序列的共享数据
     series->set_context(pnum);
     // 设置 序列的 (共享)资源清理函数

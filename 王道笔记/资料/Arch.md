@@ -10,4 +10,16 @@ netstat: ss
 
 ## /usr/local/lib 添加到动态库
 
-在 /etc/ld.so.conf.d 下建立个文件叫 local.conf，写入内容「/usr/local/lib」
+``` shell
+vim /etc/ld.so.conf.d/local.conf
+
+# 添加下列内容
+/usr/local/lib
+```
+
+## 设置终端代理
+
+``` shell
+export http_proxy=http://127.0.0.1:7890
+export https_proxy=$http_proxy
+```

@@ -205,7 +205,7 @@ void process(WFHttpTask* httpTask) {
 
     cout << "\e[93m********************************************************\e[39m" << endl;
 
-    waitGroup.done();
+    // waitGroup.done();
 }
 
 

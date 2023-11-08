@@ -103,6 +103,7 @@ void MultipartUpload::init(WFHttpTask* httpTask) {
     // 1. 获取 username 与 filename/filesize/filehash
     string uri = httpTask->get_req()->get_request_uri();
     string username = uri.substr(uri.find("=")+1);
+    cout << "\e[93m*****************************************************\e[39m" << endl;
     cout << "\e[93musername: \e[39m" << username << endl;
 
     const void* body;
@@ -138,6 +139,7 @@ void MultipartUpload::init(WFHttpTask* httpTask) {
     string uploadid = username + nowStr;
 
     cout << "\e[93muploadid: \e[39m" << uploadid << endl;
+    cout << "\e[93m*****************************************************\e[39m" << endl;
 
     // 4. 生成响应报文, 以 JSON 方式发送
     jsonBody["chunksize"] = chunksize;
@@ -157,10 +159,12 @@ void MultipartUpload::init(WFHttpTask* httpTask) {
     redisTask->get_req()->set_request(command, params);
 
     series_of(httpTask)->push_back(redisTask);
+
 }
 
 
 void MultipartUpload::uppart(WFHttpTask* httpTask) {
+
     // POST 192.168.30.128:8888/file/mupload/uppart?uploadid=liubeixxxxx&chunkidx=0
     // 1. 获取 uploadid, chunkidx 及 报文体中的 文件内容
     protocol::HttpRequest* req = httpTask->get_req();
@@ -174,9 +178,11 @@ void MultipartUpload::uppart(WFHttpTask* httpTask) {
     size_t size;
     req->get_parsed_body(&body, &size);
 
+    cout << "\e[93m*****************************************************\e[39m" << endl;
     cout << "\e[93muploadid: \e[39m" << uploadid << endl;
     cout << "\e[93mchunkidx: \e[39m" << chunkidx << endl;
     cout << "\e[93mbody: \e[39m\n" << (char*) body << endl;
+    cout << "\e[93m*****************************************************\e[39m" << endl;
 
     // 2. 以 uploadid 为名建立 目录, 将 文件内容 写入该目录下的磁盘文件, 文件名即为 chunkidx
     // 若 建目录/打开文件失败/..., 则 整个 uppart() 函数失败, 所以 需要生成失败的响应报文
@@ -216,6 +222,7 @@ void MultipartUpload::uppart(WFHttpTask* httpTask) {
                             "chunkidx_" + chunkidx, "1"};
     redisTask->get_req()->set_request(command, params);
     series_of(httpTask)->push_back(redisTask);
+
 }
 
 
@@ -241,6 +248,7 @@ void MultipartUpload::complete(WFHttpTask* httpTask) {
 
 
 void MultipartUpload::redisCallback(WFRedisTask* redisTask) {
+
     // 获取 httpTask 的响应报文
     protocol::HttpResponse* httpResp = (protocol::HttpResponse*) redisTask->user_data;
 
@@ -261,22 +269,42 @@ void MultipartUpload::redisCallback(WFRedisTask* redisTask) {
     redisResp->get_result(value);
 
     if (value.is_array()) {
+        string filehash;
         size_t chunkcnt = 0;
         for (int i = 0; i < value.arr_size(); i+=2) {
             if (value.arr_at(i).string_value() == "chunkcnt") {
                 chunkcnt = atoi(value.arr_at(i+1).string_value().c_str());
-                break;
+            }
+
+            if (value.arr_at(i).string_value() == "filehash") {
+                filehash = value.arr_at(i+1).string_value();
             }
         }
 
         size_t loadNum = (value.arr_size() - 10) / 2;
 
+        cout << "\e[93m*****************************************************\e[39m" << endl;
+        cout << "\e[93mchunkcnt: \e[39m" << chunkcnt << endl;
+        cout << "\e[93mloadNum: \e[39m" << loadNum << endl;
+        cout << "\e[93m*****************************************************\e[39m" << endl;
+
         if (chunkcnt == loadNum) {
+            // 合并文件
+            // 计算 hash
+            // 比较 hash
+            // 删除临时文件夹
 
-
+            httpResp->append_output_body("Complete Success!");
             return;
         }
     }
 
+    // 走到此处
+    // 1. redis 返回值不是数组
+    // 2. chunkcnt != loadNum
+    // 3. filehash != hash
+    httpResp->set_status_code("500");
+    httpResp->set_reason_phrase("Internal Server Error");
+    httpResp->append_output_body("Complete Failed!");
 
 }

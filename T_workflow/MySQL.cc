@@ -76,6 +76,8 @@ void mysqlCallback(WFMySQLTask* mysqlTask) {
 
         // 获取 列数
         int fieldsNum = cursor.get_field_count();
+
+        // 获取 字段名
         const protocol::MySQLField* const* fields = cursor.fetch_fields();
 
         for (int i = 0; i < fieldsNum; ++i) {

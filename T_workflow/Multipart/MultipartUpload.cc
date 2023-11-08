@@ -1,5 +1,4 @@
-#include "MutipartUpload.hh"
-#include "MutipartUpload.hh"
+#include "MultipartUpload.hh"
 
 #include <cstddef>
 #include <cstdio>
@@ -200,7 +199,7 @@ void MultipartUpload::uppart(WFHttpTask* httpTask) {
     }
 
     string filename = uploadid + "/" + chunkidx;
-    int fd = open(filename.c_str(), O_CREAT | O_RDWR);
+    int fd = open(filename.c_str(), O_CREAT | O_RDWR, 0666);
     if (fd == -1) {
         resp->set_status_code("500");
         resp->set_reason_phrase("Internal Server Error");

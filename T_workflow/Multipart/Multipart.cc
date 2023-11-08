@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "MutipartUpload.hh"
+#include "MultipartUpload.hh"
 
 
 using std::cin;

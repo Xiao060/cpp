@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
         });
     });
 
-    // 8. 
+    // 8. 创建 MySQL响应报文体, 使用 结果集迭代器
     httpServer.GET("/mysqljsoncursor", [](const wfrest::HttpReq* req, wfrest::HttpResp* resp){
         
         string url = "mysql://xiao:xiao060@localhost:3306";
@@ -165,11 +165,6 @@ int main(int argc, char* argv[]) {
             resp->String(str);
         });
     });
-
-
-
-
-
 
 
 

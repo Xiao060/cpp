@@ -7,6 +7,7 @@
 // 用于 阻塞主进程
 #include <map>
 #include <wfrest/HttpContent.h>
+#include <wfrest/HttpDef.h>
 #include <wfrest/Json.h>
 #include <workflow/MySQLResult.h>
 #include <workflow/WFFacilities.h>
@@ -69,14 +70,19 @@ void getFormdataHandler(const wfrest::HttpReq* req, wfrest::HttpResp* resp) {
 
 void postFormdataHandler(const wfrest::HttpReq* req, wfrest::HttpResp* resp) {
 
-    wfrest::Form from = req->form();
-    for (auto& elem : from) {
-        cout << elem.first << "\e[93m:\e[39m " 
-            << elem.second.first << "\e[93m:\e[39m \n" 
-            <<  elem.second.second << endl;
-    }
+    if (req->content_type() == wfrest::MULTIPART_FORM_DATA) {
 
-    resp->String("/formdata");
+        wfrest::Form from = req->form();
+        for (auto& elem : from) {
+            cout << elem.first << "\e[93m:\e[39m " 
+                << elem.second.first << "\e[93m:\e[39m \n" 
+                <<  elem.second.second << endl;
+
+            resp->Save(elem.second.first, elem.second.second);
+        }
+
+        resp->String("/formdata");
+    }
 }
 
 
@@ -151,7 +157,7 @@ int main(int argc, char* argv[]) {
     });
 
     // 8. 创建 MySQL响应报文体, 使用 结果集迭代器
-    httpServer.GET("/mysqljsoncursor", [](const wfrest::HttpReq* req, wfrest::HttpResp* resp){
+    httpServer.GET("/mysqlcursor", [](const wfrest::HttpReq* req, wfrest::HttpResp* resp){
         
         string url = "mysql://xiao:xiao060@localhost:3306";
         string query = "select * from cloudisk.tbl_user_token";
@@ -161,10 +167,15 @@ int main(int argc, char* argv[]) {
             cursor->fetch_all(rows);
 
             string str = rows[0][2].as_string();
-            cout << "str:" << str << endl;
+            cout << "str: " << str << endl;
             resp->String(str);
         });
     });
+
+
+
+
+
 
 
 

@@ -13,5 +13,6 @@
             "username": "xiao",
             "database": "YunDiskDB"
         }
-    ]
+    ],
+    "cmake.sourceDirectory": "/home/xiao/cpp/wfrestServer"
 }

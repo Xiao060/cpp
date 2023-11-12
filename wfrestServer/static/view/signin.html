@@ -66,14 +66,14 @@
     var username = document.getElementById('username');
     var password = document.getElementById('password');
     $.ajax({
-      url: "/user/signin",
+      url: "/signin",
       type: "POST",
       data: {
         "username": username.value,
         "password": password.value
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        if (textStatus == "error") {
+        if (textStatus == "ERROR") {
           alert(textStatus + " : " + errorThrown);
         } else {
           alert(textStatus);

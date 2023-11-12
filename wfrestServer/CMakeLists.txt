@@ -21,5 +21,6 @@ target_include_directories(Server PRIVATE
 # 设置 链接库
 target_link_libraries(Server PRIVATE 
     wfrest
+    crypt
 )
 

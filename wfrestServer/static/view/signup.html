@@ -82,14 +82,15 @@
     var username = document.getElementById('username');
     var password = document.getElementById('password');
     $.ajax({
-      url: "/user/signup",
+    //   url: "/user/signup",
+      url: "/signup",
       type: "POST",
       data: {
         "username": username.value,
         "password": password.value
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        if (textStatus == "error") {
+        if (textStatus == "ERROR") {
           alert(textStatus + " : " + errorThrown);
         } else {
           alert(textStatus);
@@ -100,7 +101,7 @@
           // 成功后跳到登录页
           document.getElementById("login_hint").style.display = "block";
           setTimeout(() => {
-            window.location.href = '/static/view/signin.html';
+            window.location.href = '/signin';
           }, 2000);
 
         } else {

@@ -6,11 +6,10 @@ class CloudiskServer {
 public:
     
     
-protected:
     
     
 private:
-    
+        
     
 };
 

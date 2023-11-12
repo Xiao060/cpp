@@ -10,6 +10,7 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 # 添加可执行文件
 add_executable(Server 
     src/CloudiskServer.cc
+    src/token.cc
     src/main.cc
 ) 
 
@@ -22,5 +23,6 @@ target_include_directories(Server PRIVATE
 target_link_libraries(Server PRIVATE 
     wfrest
     crypt
+    crypto
 )
 

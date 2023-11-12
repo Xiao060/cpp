@@ -25,8 +25,11 @@ public:
 
 private:
     void mysqlRegisterCallback(WFMySQLTask* mysqlTask);
-    void mysqlLoginQueryCallback(WFMySQLTask* mysqlTask);
-    
+    void mysqlLoginReadCallback(WFMySQLTask* mysqlTask);
+    // 该函数完成的是写入操作, 回调函数非必要
+    void mysqlLoginWriteCallback(WFMySQLTask* mysqlTask);
+
+
 private:
     wfrest::HttpServer _httpServer;
     WFFacilities::WaitGroup _waitGroup;

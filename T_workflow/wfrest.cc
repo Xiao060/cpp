@@ -6,21 +6,26 @@
 
 // 用于 阻塞主进程
 #include <map>
+#include <vector>
 #include <wfrest/HttpContent.h>
 #include <wfrest/HttpDef.h>
+// #include <wfrest/HttpFile.h>
 #include <wfrest/Json.h>
+#include <workflow/MySQLMessage.h>
 #include <workflow/MySQLResult.h>
 #include <workflow/WFFacilities.h>
 #include <wfrest/HttpMsg.h>
 #include <wfrest/HttpServer.h>
+#include <workflow/WFTaskFactory.h>
+#include <workflow/Workflow.h>
 
 
-using std::cin;
+
 using std::cout;
 using std::endl;
 using std::map;
 using std::string;
-
+using std::vector;
 
 
 
@@ -132,7 +137,8 @@ int main(int argc, char* argv[]) {
     // 且 报文体格式为 json格式
     httpServer.POST("/json", postJsonHandler);
 
-    // FIXME:
+    // MySQL 使用方法 1
+    // NOTE: wfrest v0.9.3 存在问题, 需要修改 wfrest 库
     // 6. 创建 MySQL响应报文体, 全部结果集以 json 格式返回
     httpServer.GET("/mysqljsonall", [](const wfrest::HttpReq* req, wfrest::HttpResp* resp){
         string name = req->query("username");
@@ -143,7 +149,8 @@ int main(int argc, char* argv[]) {
         resp->MySQL(url, query);
     });
     
-    // FIXME:
+    // MySQL 使用方法 2
+    // NOTE: wfrest v0.9.3 存在问题, 需要修改 wfrest 库
     // 7. 创建 MySQL响应报文体, 返回部分结果集
     httpServer.GET("/mysqljsonpart", [](const wfrest::HttpReq* req, wfrest::HttpResp* resp){
         string name = req->query("username");
@@ -151,11 +158,14 @@ int main(int argc, char* argv[]) {
         
         string url = "mysql://xiao:xiao060@localhost:3306";
         string query = "select * from cloudisk.tbl_user_token";
-        resp->MySQL(url, query, [](wfrest::Json* pJson){
-            cout << pJson->dump() << endl;
+        resp->MySQL(url, query, [resp](wfrest::Json* pJson){
+            // cout << pJson->dump() << endl;
+            string str = (*pJson)["result_set"]["rows"][0][1];
+            resp->String(str);
         });
     });
 
+    // MySQL 使用方法 3
     // 8. 创建 MySQL响应报文体, 使用 结果集迭代器
     httpServer.GET("/mysqlcursor", [](const wfrest::HttpReq* req, wfrest::HttpResp* resp){
         
@@ -172,7 +182,42 @@ int main(int argc, char* argv[]) {
         });
     });
 
+    // 9. 在 wfrest 中使用 序列 访问 MySQL 
+    httpServer.GET("/series_mysql", 
+    [](const wfrest::HttpReq* req, wfrest::HttpResp* resp, SeriesWork* series){
+        string uri = "mysql://xiao:xiao060@localhost";
+        WFMySQLTask* mysqlTask =  WFTaskFactory::create_mysql_task(uri, 1, [resp](WFMySQLTask* mysqlTask){
 
+            protocol::MySQLResponse* mysqlResp = mysqlTask->get_resp(); 
+            protocol::MySQLResultCursor cursor(mysqlResp);
+
+            vector<vector<protocol::MySQLCell>> rows;
+            cursor.fetch_all(rows);
+            string str = rows[1][1].as_string();
+            resp->String(str);
+        });
+
+        string query = "select * from cloudisk.tbl_user_token";
+        mysqlTask->get_req()->set_query(query);
+        series->push_back(mysqlTask);
+    });
+
+
+    // 10. 在 wfrest 中使用 序列, 搭配 定时器任务 使用
+    // NOTE:定时器任务 不是 网络任务
+    // 每个请求方法都 有一个三参数版本, 第3个参数即为 序列Series
+    httpServer.GET("/series_timer", 
+    [](const wfrest::HttpReq * , wfrest::HttpResp * resp, SeriesWork * series){
+
+        // 定时器 任务
+        auto timerTask = WFTaskFactory::create_timer_task(3000 * 1000, 
+        [resp](WFTimerTask * ){
+            printf("timerCallback is running.\n");
+            resp->String("series Timer test");
+        });
+        //将创建好的定时器任务添加到序列中
+        series->push_back(timerTask);
+    });
 
 
 

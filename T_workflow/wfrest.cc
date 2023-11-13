@@ -10,7 +10,7 @@
 #include <wfrest/HttpContent.h>
 #include <wfrest/HttpDef.h>
 // #include <wfrest/HttpFile.h>
-#include <wfrest/Json.h>
+// #include <wfrest/Json.h>
 #include <workflow/MySQLMessage.h>
 #include <workflow/MySQLResult.h>
 #include <workflow/WFFacilities.h>
@@ -104,10 +104,10 @@ void postUrlencodedHandler(const wfrest::HttpReq* req, wfrest::HttpResp* resp) {
 
 void postJsonHandler(const wfrest::HttpReq* req, wfrest::HttpResp* resp) {
 
-    wfrest::Json json = req->json();
-    cout << "username: " << json["username"] << endl;
-    cout << "age: " << json["age"] << endl;
-    cout << json.dump() << endl;
+    //wfrest::Json json = req->json();
+    //cout << "username: " << json["username"] << endl;
+    //cout << "age: " << json["age"] << endl;
+    //cout << json.dump() << endl;
 
     resp->String("/json");
 }
@@ -158,8 +158,8 @@ int main(int argc, char* argv[]) {
         
         string url = "mysql://xiao:xiao060@localhost:3306";
         string query = "select * from cloudisk.tbl_user_token";
-        resp->MySQL(url, query, [resp](wfrest::Json* pJson){
-            // cout << pJson->dump() << endl;
+        resp->MySQL(url, query, [respresp](wfrest::Json* pJson){
+            // resp->String(pJson->dump());
             string str = (*pJson)["result_set"]["rows"][0][1];
             resp->String(str);
         });

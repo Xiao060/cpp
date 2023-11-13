@@ -1,8 +1,9 @@
 build
 workflow
 bin
+wfrest
 
-# *.txt
+*.txt
 log*
 client
 server

@@ -14,5 +14,5 @@
             "database": "YunDiskDB"
         }
     ],
-    "cmake.sourceDirectory": "/home/xiao/cpp/wfrestServer"
+    "cmake.sourceDirectory": "/home/xiao/mycode/wfrestServer"
 }

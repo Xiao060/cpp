@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
     Server.loadStaticResourceModule();
     Server.loadUserRegisterModule();
     Server.loadUserLoginModule();
+    Server.loadUserInfoModule();
     Server.start(8888);
 
 

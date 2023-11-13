@@ -54,6 +54,7 @@ void CloudiskServer::mysqlRegisterCallback(WFMySQLTask* mysqlTask) {
     protocol::MySQLResponse* resp = mysqlTask->get_resp();
     int type = resp->get_packet_type();
     if (type != MYSQL_PACKET_OK) {
+        cout << "Error " << resp->get_error_code() << ": " << resp->get_error_msg() << endl;
         httpResp->String("ERROR");
     } else {
         httpResp->String("SUCCESS");
@@ -85,7 +86,7 @@ void CloudiskServer::mysqlLoginReadCallback(WFMySQLTask* mysqlTask) {
     protocol::MySQLResponse* resp = mysqlTask->get_resp();
     int type = resp->get_packet_type();
     if (type == MYSQL_PACKET_ERROR) {
-        cout << "SQL 语句错误" << endl;
+        cout << "Error " << resp->get_error_code() << ": " << resp->get_error_msg() << endl;
         httpResp->String("ERROR");
         return;
     }
@@ -200,12 +201,12 @@ void CloudiskServer::loadStaticResourceModule() {
 
     // 4. auth.js
     _httpServer.GET("/static/js/auth.js", [](const wfrest::HttpReq* req, wfrest::HttpResp* resp){
-        resp->File("..//static/js/auth.js");
+        resp->File("../static/js/auth.js");
     });
 
     // 5. avatar.jpeg
     _httpServer.GET("/static/img/avatar.jpeg", [](const wfrest::HttpReq* req, wfrest::HttpResp* resp){
-        resp->File("..//static/img/avatar.jpeg");
+        resp->File("../static/img/avatar.jpeg");
     });
 
 }

@@ -1,0 +1,67 @@
+编程语言: 
+具备良好的编程习惯; 
+熟悉 C/C++ 基础语法, 如流程控制/指针/引用/文件操作;
+熟悉 C++ 核心特性, 如面向对象编程/范式编程/运算符重载; 
+熟练掌握 C++11 的新特性, 如移动语义/智能指针/std::function/lambda/增强for循环; 
+熟悉 STL 六大组件的使用, 了解常用容器的底层实现及空间配置器的实现原理
+
+数据结构与算法:
+熟悉常用数据结构, 如顺序表/链表/栈/队列/二叉树/哈希表;
+了解复杂数据结构的实现, 如B树/B+树/红黑树;
+熟练掌握排序及查找算法, 如快速排序/归并排序/堆排序/二分查找;
+
+操作系统:
+熟悉 Linux 常用命令和系统调用;
+熟悉线程池的搭建与使用; 
+熟练掌握互斥锁与条件变量的使用;
+
+Linux 网络编程:
+熟悉 OSI 七层模型和 TCP/IP 五层模型;
+了解 HTTP/TCP/UDP/IP 协议, 可以熟练的使用 tcpdump 抓包并通过 Wireshark 进行分析;
+熟悉 Reactor 同步模型的构造与使用;
+熟练使用基于 Proactor 的 workflow 框架;
+熟练掌握 IO 多路复用模型并了解其底层实现, 如select/poll/epoll;
+
+数据库:
+熟悉 MySQL/Redis 基本操作, 了解事务机制;
+熟练使用 mysql/hiredis/redis++ 通过 C++ 访问 MySQL/Redis;
+
+设计模式:
+了解七种设计原则, 如开闭原则/里氏替换原则/组合复用原则/迪米特法则;
+熟练掌握常见设计模式, 如单例/简单工厂/工厂方法/抽象工厂/观察者模式;
+
+开发工具链:
+版本控制工具: Git;
+编译与构建工具: GCC/G++/CMake/Makefile;
+数据库: MySQL/Redis;
+编辑器: Vim/NeoVim/VSCode;
+ssh 工具: XShell/MobaXterm;
+源码阅读工具: SlickEdit;
+类图/流程图: StarUML;
+数据库可视化: Navicat/RedisInsight/AnotherRedisDesktopManager;
+内存分析: Valgrind
+网络编程: Tcpdump/Wireshark/Postman
+
+其他:
+具备 CET4 水平, 可以流畅阅读英文文档, 浏览 Stack Overflow/Cppreference 等网站
+
+
+公司内部 BBS 搜索模块
+项目介绍: 该项目是基于 C++ 开发的网页搜索引擎, 主要实现的功能是关键词联想与网页搜索;
+技术要点: Reactor 模型/线程池/Cppjieba/Simhash/最小编辑距离/TF-IDF/余弦相似度/Mysqlclient/Redis/Hiredis/Redis++/Log4cpp;
+主要工作: 
+1. 基于 Reactor 模型, 利用线程池与 IO 多路复用技术(epoll) 实现高并发的检索系统;
+2. 使用 Cppjieba 对语料进行分词, 过滤停用词, 建立关键词索引库与倒排索引库, 存入 MySQL;
+3. 使用 Simhash 对网页进行去重, 根据 TF-IDF 算法计算单词权重, 建立网页库与倒排索引库, 存入 MySQL;
+4. 利用最小编辑距离算法, 查找语料中与用户输入词语最相似的 5 个词语, 实现关键词联想功能;
+5. 利用余弦相似度算法, 对用户输入进行分析并查找相似度最高的网页以 Json 格式返回, 实现网页搜索功能;
+6. 利用 Redis 作为缓存系统, 将查询到的结果存入 Redis 中, 提高查询速度;
+
+企业云服务器
+项目介绍: 该项目是基于 C++ 开发的公司内部文件管理系统, 用户可将文件上传至云端服务器进行保存, 支持网页端登录/上传/下载/共享/文件列表展示等;
+技术要点: Proactor 模型/Workflow/WFrest/SPRC/MySQL/OpenSSL/Ppconsul/RabbitMQ/Protobuf/Json/Log4cpp/Aliyun-oss-cpp-sdk
+主要工作:
+1. 基于 Proactor 模型/RPC 思想, 使用 workflow/Wfrest/SRPC, 实现 api 网关, 将功能拆分成不同的微服务, 防止单点故障导致全局失效;
+2. 使用注册中心, 减少与微服务的沟通成本;
+3. 使用 OSS 服务, 将用户上传的文件备份到阿里云, 防止本地服务器故障丢失文件;
+4. 使用 消息队列, 完成异步备份, 提高服务端响应速度;

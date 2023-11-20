@@ -377,3 +377,8 @@ void CloudiskServer::mysqlUserInfoCallback(WFMySQLTask* mysqlTask) {
     // 4. 设置响应报文
     resp->String(respMsg.dump());
 }
+
+
+void CloudiskServer::mysqlFileQueryCallback(WFMySQLTask* mysqlTask) {
+
+}

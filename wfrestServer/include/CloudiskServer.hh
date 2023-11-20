@@ -33,6 +33,7 @@ private:
     // 该函数完成的是写入操作, 回调函数非必要
     void mysqlLoginWriteCallback(WFMySQLTask* mysqlTask);
     void mysqlUserInfoCallback(WFMySQLTask* mysqlTask);
+    void mysqlFileQueryCallback(WFMySQLTask* mysqlTask);
 
 
 private:

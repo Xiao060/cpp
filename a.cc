@@ -1,8 +1,10 @@
 #include <memory>
 
 #include <iostream>
+#include <ostream>
+#include <string>
 
-using std::cin;
+using std::string;
 using std::cout;
 using std::endl;
 
